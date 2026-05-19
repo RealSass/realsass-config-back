@@ -2,9 +2,6 @@
 # Dockerfile — Config Service
 # Stack: NestJS 11 · Prisma 7.8.0 · PostgreSQL · Redis · pnpm · Node 22
 #
-# Fix ERR_PNPM_IGNORED_BUILDS: la lista de builds permitidos va en package.json
-# bajo pnpm.onlyBuiltDependencies — pnpm v9 la lee sin ambigüedad.
-#
 # Railway: Release Command → pnpm prisma migrate deploy
 # =============================================================================
 
