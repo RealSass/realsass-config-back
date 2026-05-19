@@ -27,7 +27,7 @@ RUN node node_modules/typescript/bin/tsc -p tsconfig.build.json && \
     echo "=== dist contents ===" && \
     ls -la dist/ || echo "dist/ vacío o no existe"
 
-RUN test -f dist/main.js && echo "✓ dist/main.js ok" || (echo "✗ dist/main.js no existe" && exit 1)
+RUN test -f dist/src/main.js && echo "✓ dist/src/main.js ok" || (echo "✗ no existe" && exit 1)
 
 # ── Etapa 2: runtime ──────────────────────────────────────────────────────────
 FROM node:22-alpine AS production
