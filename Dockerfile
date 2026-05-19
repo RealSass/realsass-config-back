@@ -1,6 +1,10 @@
 # =============================================================================
-# Dockerfile — Config Service — MODO DIAGNÓSTICO
+# Dockerfile — Config Service
+# Stack: NestJS 11 · Prisma 7.8.0 · PostgreSQL · Redis · pnpm · Node 22
+# Railway: Release Command → pnpm prisma migrate deploy
 # =============================================================================
+
+# ── Etapa 1: build ────────────────────────────────────────────────────────────
 FROM node:22-alpine AS builder
 
 WORKDIR /app
@@ -16,18 +20,28 @@ RUN pnpm prisma generate
 
 COPY . .
 
-# Ver tsconfig que está usando
-RUN cat tsconfig.json
-RUN cat tsconfig.build.json 2>/dev/null || echo "NO HAY tsconfig.build.json"
+RUN node node_modules/@nestjs/cli/bin/nest.js build
 
-# Correr nest build con output completo, sin suprimir errores
-RUN node node_modules/@nestjs/cli/bin/nest.js build --debug 2>&1; echo "EXIT CODE: $?"
+RUN test -f dist/main.js && echo "✓ dist/main.js ok" || (echo "✗ dist/main.js no existe" && exit 1)
 
-# Ver qué hay en el directorio después del build
-RUN ls -la
-RUN ls -la dist 2>/dev/null || echo "=== dist NO EXISTE ==="
+# ── Etapa 2: runtime ──────────────────────────────────────────────────────────
+FROM node:22-alpine AS production
 
-# Intentar compilar directamente con tsc como diagnóstico
-RUN node node_modules/typescript/bin/tsc --version
-RUN node node_modules/typescript/bin/tsc -p tsconfig.build.json 2>&1; echo "TSC EXIT: $?"
-RUN ls -la dist 2>/dev/null || echo "=== dist SIGUE SIN EXISTIR después de tsc ==="
+WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma
+
+RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm prisma generate
+
+COPY --from=builder /app/dist ./dist
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+EXPOSE 3001
+
+CMD ["node", "dist/main"]
