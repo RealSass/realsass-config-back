@@ -1,36 +1,28 @@
 # =============================================================================
 # Dockerfile — Config Service
-# Stack: NestJS 11 · Prisma 7.4.2 · PostgreSQL · Redis · pnpm · Node 22
+# Stack: NestJS 11 · Prisma 7.8.0 · PostgreSQL · Redis · pnpm · Node 22
 #
-# Fix principal: prisma generate debe correr DESPUÉS de pnpm install
-# y ANTES de nest build, porque @prisma/client no existe hasta ese momento.
+# Fix ERR_PNPM_IGNORED_BUILDS: pnpm bloquea postinstall scripts por defecto.
+# El .npmrc con approve-builds resuelve el bloqueo de prisma, bcrypt, etc.
 #
-# Railway: este Dockerfile reemplaza al railpack automático.
-# Variables requeridas en Railway:
-#   DATABASE_URL · REDIS_URL · CONFIG_MASTER_KEY
-#   FIREBASE_PROJECT_ID · FIREBASE_CLIENT_EMAIL · FIREBASE_PRIVATE_KEY
+# Railway: Release Command → pnpm prisma migrate deploy
 # =============================================================================
 
-# ── Etapa 1: deps ─────────────────────────────────────────────────────────────
+# ── Etapa 1: deps + prisma generate ──────────────────────────────────────────
 FROM node:22-alpine AS deps
 
 WORKDIR /app
 
-# pnpm via corepack (viene con Node 22)
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copiar manifiestos primero para aprovechar cache de capas
-COPY package.json pnpm-lock.yaml ./
-
-# Copiar schema ANTES de install para que prisma postinstall
-# no falle si el schema no está presente
+# .npmrc DEBE copiarse antes de install para que pnpm lo lea
+COPY package.json pnpm-lock.yaml .npmrc ./
 COPY prisma ./prisma
 
-# Instalar todas las deps (incluyendo devDeps necesarias para el build)
+# install completo (con devDeps) — prisma CLI está en devDependencies
 RUN pnpm install --frozen-lockfile
 
-# Generar el cliente de Prisma — PASO CRÍTICO
-# Sin esto @prisma/client está vacío y el build de TS falla con 62 errores
+# Generar el cliente de Prisma DESPUÉS del install
 RUN pnpm prisma generate
 
 # ── Etapa 2: build ────────────────────────────────────────────────────────────
@@ -40,42 +32,32 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Traer deps + cliente generado desde la etapa anterior
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/prisma ./prisma
-
-# Copiar el resto del código fuente
 COPY . .
 
-# Compilar TypeScript
 RUN pnpm run build
 
-# ── Etapa 3: producción ───────────────────────────────────────────────────────
+# ── Etapa 3: runtime ──────────────────────────────────────────────────────────
 FROM node:22-alpine AS production
 
 WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Solo deps de producción
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml .npmrc ./
 COPY prisma ./prisma
-RUN pnpm install --frozen-lockfile --prod
 
-# Regenerar el cliente en la imagen final (prod no tiene devDeps pero sí prisma CLI)
+# install completo en runtime también (necesitamos prisma client en node_modules)
+RUN pnpm install --frozen-lockfile
+
+# Re-generar client en imagen final para asegurar consistencia
 RUN pnpm prisma generate
 
-# Copiar el build compilado
 COPY --from=builder /app/dist ./dist
 
-# Usuario no-root
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
 EXPOSE 3001
 
-# Railway inyecta DATABASE_URL en runtime; migrate deploy antes de levantar
-# Si preferís correr las migraciones como Release Command en Railway,
-# quitá la línea de migrate y configurá:
-#   Release Command: pnpm prisma migrate deploy
-CMD ["sh", "-c", "node dist/main"]
+CMD ["node", "dist/main"]
