@@ -2,8 +2,8 @@
 # Dockerfile — Config Service
 # Stack: NestJS 11 · Prisma 7.8.0 · PostgreSQL · Redis · pnpm · Node 22
 #
-# Fix ERR_PNPM_IGNORED_BUILDS: pnpm bloquea postinstall scripts por defecto.
-# El .npmrc con approve-builds resuelve el bloqueo de prisma, bcrypt, etc.
+# Fix ERR_PNPM_IGNORED_BUILDS: la lista de builds permitidos va en package.json
+# bajo pnpm.onlyBuiltDependencies — pnpm v9 la lee sin ambigüedad.
 #
 # Railway: Release Command → pnpm prisma migrate deploy
 # =============================================================================
@@ -15,11 +15,10 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# .npmrc DEBE copiarse antes de install para que pnpm lo lea
-COPY package.json pnpm-lock.yaml .npmrc ./
+# package.json incluye pnpm.onlyBuiltDependencies con la lista de scripts aprobados
+COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 
-# install completo (con devDeps) — prisma CLI está en devDependencies
 RUN pnpm install --frozen-lockfile
 
 # Generar el cliente de Prisma DESPUÉS del install
@@ -44,13 +43,11 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY package.json pnpm-lock.yaml .npmrc ./
+COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 
-# install completo en runtime también (necesitamos prisma client en node_modules)
 RUN pnpm install --frozen-lockfile
 
-# Re-generar client en imagen final para asegurar consistencia
 RUN pnpm prisma generate
 
 COPY --from=builder /app/dist ./dist
