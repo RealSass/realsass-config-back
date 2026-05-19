@@ -2,6 +2,10 @@
 # Dockerfile — Config Service
 # Stack: NestJS 11 · Prisma 7.8.0 · PostgreSQL · Redis · pnpm · Node 22
 #
+# Solución definitiva para ERR_PNPM_IGNORED_BUILDS:
+# --ignore-scripts evita que pnpm bloquee el install por postinstall scripts.
+# prisma generate se corre manualmente DESPUÉS del install.
+#
 # Railway: Release Command → pnpm prisma migrate deploy
 # =============================================================================
 
@@ -12,16 +16,17 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# package.json incluye pnpm.onlyBuiltDependencies con la lista de scripts aprobados
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 
-RUN pnpm install --frozen-lockfile
+# --ignore-scripts: pnpm instala todo sin correr ningún postinstall script
+# Esto evita ERR_PNPM_IGNORED_BUILDS sin necesitar configuración extra
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
-# Generar el cliente de Prisma DESPUÉS del install
+# Con --ignore-scripts prisma no auto-generó el cliente, lo corremos a mano
 RUN pnpm prisma generate
 
-# ── Etapa 2: build ────────────────────────────────────────────────────────────
+# ── Etapa 2: build TypeScript ─────────────────────────────────────────────────
 FROM node:22-alpine AS builder
 
 WORKDIR /app
@@ -40,10 +45,10 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 RUN pnpm prisma generate
 

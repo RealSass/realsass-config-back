@@ -18,7 +18,8 @@
     "test:cov": "jest --coverage",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "ts-node --project tsconfig.json prisma/seed.ts",
-    "db:seed": "ts-node --project tsconfig.json prisma/seed.ts"
+    "db:seed": "ts-node --project tsconfig.json prisma/seed.ts",
+    "db:migrate": "prisma migrate deploy"
   },
   "prisma": {
     "seed": "ts-node --project tsconfig.json prisma/seed.ts"
@@ -81,16 +82,7 @@
     "typescript-eslint": "^8.20.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "prisma",
-      "@prisma/engines",
-      "bcrypt",
-      "@nestjs/core",
-      "@firebase/util",
-      "msgpackr-extract",
-      "protobufjs",
-      "unrs-resolver"
-    ]
+    "onlyBuiltDependencies": []
   },
   "jest": {
     "moduleFileExtensions": [
