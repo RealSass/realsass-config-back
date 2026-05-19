@@ -4,7 +4,7 @@
 # Railway: Release Command → pnpm prisma migrate deploy
 # =============================================================================
 
-# ── Etapa 1: build completo ───────────────────────────────────────────────────
+# ── Etapa 1: build ────────────────────────────────────────────────────────────
 FROM node:22-alpine AS builder
 
 WORKDIR /app
@@ -14,16 +14,13 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 
-# --ignore-scripts bypasea ERR_PNPM_IGNORED_BUILDS
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
-# Generar cliente Prisma explícitamente
 RUN pnpm prisma generate
 
 COPY . .
 
-# Llamar al CLI de NestJS por su ruta absoluta — evita depender del
-# binario registrado por postinstall (que --ignore-scripts saltea)
+# nest build usa tsconfig.build.json que excluye tests y node_modules
 RUN node node_modules/@nestjs/cli/bin/nest.js build
 
 RUN test -f dist/main.js && echo "✓ dist/main.js ok" || (echo "✗ dist/main.js no existe" && exit 1)
