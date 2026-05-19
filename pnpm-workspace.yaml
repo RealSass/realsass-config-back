@@ -1,3 +1,12 @@
+allowBuilds:
+  '@firebase/util': false
+  '@nestjs/core': false
+  '@prisma/engines': false
+  bcrypt: false
+  msgpackr-extract: false
+  prisma: false
+  protobufjs: false
+  unrs-resolver: false
 onlyBuiltDependencies:
   - prisma
   - "@prisma/engines"
@@ -7,4 +16,3 @@ onlyBuiltDependencies:
   - msgpackr-extract
   - protobufjs
   - unrs-resolver
- 

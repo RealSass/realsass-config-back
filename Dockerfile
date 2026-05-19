@@ -1,4 +1,11 @@
-FROM node:22-alpine
+# =============================================================================
+# Dockerfile — Config Service
+# Stack: NestJS 11 · Prisma 7.8.0 · PostgreSQL · Redis · pnpm · Node 22
+# Railway: Release Command → pnpm prisma migrate deploy
+# =============================================================================
+
+# ── Etapa 1: build ────────────────────────────────────────────────────────────
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -6,25 +13,38 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
-COPY . .
 
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
+# Generar cliente Prisma
 RUN pnpm prisma generate
 
-RUN echo "=== tsconfig.json ===" && cat tsconfig.json
-RUN echo "=== tsconfig.build.json ===" && cat tsconfig.build.json 2>/dev/null || echo "NO EXISTE"
-RUN echo "=== nest-cli.json ===" && cat nest-cli.json 2>/dev/null || echo "NO EXISTE"
+COPY . .
 
-RUN echo "=== CORRIENDO nest build ===" && \
-    node node_modules/@nestjs/cli/bin/nest.js build 2>&1; \
-    echo "=== EXIT: $? ===" && \
-    ls -la dist 2>/dev/null || echo "=== dist NO EXISTE ==="
+# Compilar con tsc directamente — no depende del binario nest que
+# postinstall registra y que --ignore-scripts bloquea
+RUN node node_modules/typescript/bin/tsc -p tsconfig.build.json
 
-RUN echo "=== CORRIENDO tsc directo ===" && \
-    node node_modules/typescript/bin/tsc -p tsconfig.build.json --listEmittedFiles 2>&1; \
-    echo "=== TSC EXIT: $? ==="
+RUN test -f dist/main.js && echo "✓ dist/main.js ok" || (echo "✗ dist/main.js no existe" && exit 1)
 
-RUN ls -la dist 2>/dev/null || echo "dist sigue sin existir"
+# ── Etapa 2: runtime ──────────────────────────────────────────────────────────
+FROM node:22-alpine AS production
 
-CMD ["sh", "-c", "echo 'contenedor vivo' && sleep 3600"]
+WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma
+
+RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm prisma generate
+
+COPY --from=builder /app/dist ./dist
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+EXPOSE 3001
+
+CMD ["node", "dist/main"]
