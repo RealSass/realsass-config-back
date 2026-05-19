@@ -23,7 +23,9 @@ COPY . .
 
 # Compilar con tsc directamente — no depende del binario nest que
 # postinstall registra y que --ignore-scripts bloquea
-RUN node node_modules/typescript/bin/tsc -p tsconfig.build.json
+RUN node node_modules/typescript/bin/tsc -p tsconfig.build.json && \
+    echo "=== dist contents ===" && \
+    ls -la dist/ || echo "dist/ vacío o no existe"
 
 RUN test -f dist/main.js && echo "✓ dist/main.js ok" || (echo "✗ dist/main.js no existe" && exit 1)
 
