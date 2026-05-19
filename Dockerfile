@@ -17,15 +17,16 @@ COPY prisma ./prisma
 # --ignore-scripts bypasea ERR_PNPM_IGNORED_BUILDS
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
-# Generar cliente Prisma explícitamente (necesario antes del build TS)
+# Generar cliente Prisma explícitamente
 RUN pnpm prisma generate
 
-# Copiar el resto del código y compilar
 COPY . .
-RUN pnpm run build
 
-# Verificar que el build produjo dist/main.js — falla el build si no existe
-RUN test -f dist/main.js && echo "✓ dist/main.js existe" || (echo "✗ ERROR: dist/main.js no fue generado" && exit 1)
+# Llamar al CLI de NestJS por su ruta absoluta — evita depender del
+# binario registrado por postinstall (que --ignore-scripts saltea)
+RUN node node_modules/@nestjs/cli/bin/nest.js build
+
+RUN test -f dist/main.js && echo "✓ dist/main.js ok" || (echo "✗ dist/main.js no existe" && exit 1)
 
 # ── Etapa 2: runtime ──────────────────────────────────────────────────────────
 FROM node:22-alpine AS production
@@ -40,7 +41,6 @@ COPY prisma ./prisma
 RUN pnpm install --frozen-lockfile --ignore-scripts
 RUN pnpm prisma generate
 
-# Copiar dist desde builder
 COPY --from=builder /app/dist ./dist
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
