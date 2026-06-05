@@ -1,3 +1,38 @@
+#!/usr/bin/env bash
+# =============================================================================
+# fix-redis-econnreset.sh
+# Corrige RedisService para manejar ECONNRESET gracefully.
+#
+# Problema: Redis free tier (Railway/Upstash) cierra conexiones idle.
+# ioredis emite un evento 'error' sin handler → Node crashea con
+# "Unhandled error event".
+#
+# Solución:
+#   - retryStrategy con backoff exponencial → reconecta automáticamente
+#   - reconnectOnError → reconecta en ECONNRESET específicamente
+#   - handler 'error' explícito → el proceso no crashea por evento no manejado
+#   - keepAlive + connectTimeout → evita drops silenciosos
+#
+# Uso:
+#   chmod +x fix-redis-econnreset.sh
+#   ./fix-redis-econnreset.sh [ruta/al/repo]
+# =============================================================================
+
+set -euo pipefail
+
+REPO_DIR="${1:-.}"
+REDIS_SERVICE="$REPO_DIR/src/redis/redis.service.ts"
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+ok()  { echo -e "${GREEN}✓${NC} $1"; }
+err() { echo -e "${RED}✗${NC} $1"; exit 1; }
+
+[[ -f "$REDIS_SERVICE" ]] || err "No se encontró $REDIS_SERVICE"
+
+cat > "$REDIS_SERVICE" << 'EOF'
 // src/redis/redis.service.ts
 //
 // Manejo de reconexión para Redis en free tier (Railway / Upstash).
@@ -62,3 +97,14 @@ export class RedisService extends Redis implements OnModuleInit, OnModuleDestroy
     await this.quit();
   }
 }
+EOF
+
+ok "src/redis/redis.service.ts corregido"
+echo ""
+echo "Cambios aplicados:"
+echo "  + retryStrategy    → backoff exponencial hasta 30s, máx 20 reintentos"
+echo "  + reconnectOnError → reconecta en ECONNRESET / ETIMEDOUT / ECONNREFUSED"
+echo "  + on('error')      → handler explícito, el proceso ya no crashea"
+echo "  + keepAlive        → TCP keepalive cada 10s"
+echo "  + connectTimeout   → falla rápido si Redis no responde en 10s"
+echo ""
