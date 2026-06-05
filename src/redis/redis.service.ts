@@ -1,35 +1,29 @@
 // src/redis/redis.service.ts
-//
-// Manejo de reconexión para Redis en free tier (Railway / Upstash).
-// El proveedor cierra conexiones idle → ioredis emite 'error' con ECONNRESET.
-// Sin handler explícito Node trata el evento como unhandled y crashea el proceso.
 
 import { Injectable, OnModuleDestroy, OnModuleInit, Logger } from '@nestjs/common';
 import Redis, { type RedisOptions } from 'ioredis';
 
 const REDIS_OPTIONS: RedisOptions = {
-  // Reconexión automática con backoff exponencial.
-  // retries → número de intentos acumulados desde el último connect exitoso.
-  // Tope en 30 s para no saturar en caso de outage prolongado.
+  // Backoff exponencial: 200ms, 400ms... tope 30s, máx 20 reintentos.
   retryStrategy: (retries: number) => {
-    if (retries > 20) return null; // detener reconexión tras 20 intentos seguidos
+    if (retries > 20) return null;
     return Math.min(retries * 200, 30_000);
   },
 
-  // Reconectar específicamente en ECONNRESET (Redis cierra la conexión idle).
+  // Reconectar en errores de red típicos del free tier.
   reconnectOnError: (err: Error) => {
     const shouldReconnect =
       err.message.includes('ECONNRESET') ||
       err.message.includes('ETIMEDOUT') ||
       err.message.includes('ECONNREFUSED');
-    return shouldReconnect ? 2 : false; // 2 = reconectar Y reenviar el comando pendiente
+    return shouldReconnect ? 2 : false;
   },
 
-  lazyConnect:        true,
+  lazyConnect:          true,
   maxRetriesPerRequest: 3,
-  connectTimeout:     10_000, // 10 s para establecer conexión inicial
-  keepAlive:          10_000, // TCP keepalive cada 10 s — previene drops silenciosos
-  enableOfflineQueue: true,   // encolar comandos mientras reconecta
+  connectTimeout:       10_000,
+  enableOfflineQueue:   true,
+  // keepAlive DESACTIVADO — los pings TCP evitan que Railway duerma Redis.
 };
 
 @Injectable()
@@ -39,19 +33,9 @@ export class RedisService extends Redis implements OnModuleInit, OnModuleDestroy
   constructor() {
     super(process.env['REDIS_URL'] ?? 'redis://localhost:6379', REDIS_OPTIONS);
 
-    // Handler explícito: sin esto Node lanza "Unhandled error event" y crashea.
-    // El retryStrategy ya gestiona la reconexión — aquí solo logueamos.
-    this.on('error', (err: Error) => {
-      this.logger.warn(`Redis error: ${err.message}`);
-    });
-
-    this.on('reconnecting', (delay: number) => {
-      this.logger.log(`Redis reconectando en ${delay}ms...`);
-    });
-
-    this.on('connect', () => {
-      this.logger.log('Redis conectado');
-    });
+    this.on('error',       (err: Error) => this.logger.warn(`Redis error: ${err.message}`));
+    this.on('reconnecting',(delay: number) => this.logger.log(`Redis reconectando en ${delay}ms...`));
+    this.on('connect',     () => this.logger.log('Redis conectado'));
   }
 
   async onModuleInit(): Promise<void> {
