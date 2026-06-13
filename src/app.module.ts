@@ -32,6 +32,7 @@ import { OrganizationsClientModule } from './organizations-client/organizations-
     }),
     FirebaseModule,
     PrismaModule,
+    OrganizationsClientModule,
     RedisModule,
     ConfigCacheModule,
     ConfigAuditModule,
