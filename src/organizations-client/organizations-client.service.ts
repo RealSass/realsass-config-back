@@ -11,6 +11,10 @@ import type { OrganizationAccessResult } from './types/organization-access.types
 const CACHE_TTL_SECONDS = Number(process.env['CONFIG_CACHE_TTL_ORG_ACCESS'] ?? 30);
 const REQUEST_TIMEOUT_MS = 5000;
 
+// real-back tiene setGlobalPrefix('api/v1') — ver src/main.ts de real-back.
+// Configurable por si alguna vez cambia (o se llama a una instancia sin prefijo).
+const ORGANIZATIONS_SERVICE_PREFIX = process.env['ORGANIZATIONS_SERVICE_PREFIX'] ?? '/api/v1';
+
 /**
  * Cliente HTTP hacia real-back (organizaciones-back).
  *
@@ -78,7 +82,7 @@ export class OrganizationsClientService {
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
-      const res = await fetch(`${this.baseUrl}/auth/organization-access`, {
+      const res = await fetch(`${this.baseUrl}${ORGANIZATIONS_SERVICE_PREFIX}/auth/organization-access`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${firebaseToken}`,
