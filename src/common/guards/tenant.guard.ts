@@ -1,35 +1,49 @@
 import {
-  CanActivate, ExecutionContext, ForbiddenException, Injectable,
+  CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { OrganizationsClientService } from '../../organizations-client/organizations-client.service';
 import type { TenantContext } from '../types/tenant-context';
 
+/**
+ * Resuelve el TenantContext consultando a real-back (organizaciones-back)
+ * vía OrganizationsClientService — Opción B del ADR de integración.
+ *
+ * Reemplaza la versión anterior que consultaba tablas locales
+ * `users`/`memberships` (duplicado del template del ecosistema, eliminadas
+ * en la migración 20260612120000_decouple_identity_from_real_back).
+ */
 @Injectable()
 export class TenantGuard implements CanActivate {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly orgsClient: OrganizationsClientService) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const req            = ctx.switchToHttp().getRequest();
-    const user           = req.user;
-    const organizationId = req.headers['x-organization-id'] as string;
+    const user           = req.user as { uid: string } | undefined;
+    const organizationId = req.headers['x-organization-id'] as string | undefined;
+    const token          = this.extractToken(req);
 
     if (!organizationId) throw new ForbiddenException('Header x-organization-id requerido');
+    if (!user?.uid) throw new UnauthorizedException('Usuario no autenticado');
+    if (!token) throw new UnauthorizedException('Token de autenticación requerido');
 
-    const dbUser = await this.prisma.user.findUnique({ where: { firebaseUid: user.uid } });
-    if (!dbUser) throw new ForbiddenException('Usuario no encontrado');
+    const access = await this.orgsClient.getAccess(token, user.uid, organizationId);
 
-    const membership = await this.prisma.membership.findUnique({
-      where: { userId_organizationId: { userId: dbUser.id, organizationId } },
-    });
-    if (!membership) throw new ForbiddenException('No tenés acceso a esta organización');
+    if (!access.canAccess || !access.role || !access.permissions || !access.userId) {
+      throw new ForbiddenException(access.reason ?? 'No tenés acceso a esta organización');
+    }
 
     const tenantCtx: TenantContext = {
-      userId:             dbUser.id,
+      userId:         access.userId,
       organizationId,
-      role:               membership.role,
-      productPermissions: (membership.productPermissions as any) ?? {},
+      role:           access.role,
+      permissions:    access.permissions,
     };
     req.tenant = tenantCtx;
     return true;
+  }
+
+  private extractToken(req: { headers: Record<string, string | undefined> }): string | undefined {
+    const [type, token] = req.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }

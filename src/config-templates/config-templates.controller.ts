@@ -30,7 +30,7 @@ export class ConfigTemplatesController {
 
   @Post()
   @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
+  @Roles('OWNER', 'COLLABORATOR')
   @HttpCode(HttpStatus.CREATED)
   create(@Tenant() t: TenantContext, @Body() dto: CreateTemplateDto) {
     return this.svc.create(t.organizationId, t.userId, dto);
@@ -38,7 +38,7 @@ export class ConfigTemplatesController {
 
   @Patch(':key')
   @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
+  @Roles('OWNER', 'COLLABORATOR')
   update(
     @Tenant() t: TenantContext,
     @Param('key') key: string,

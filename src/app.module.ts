@@ -17,6 +17,7 @@ import { ConfigTemplatesModule } from './config-templates/config-templates.modul
 import { ConfigQuotasModule }   from './config-quotas/config-quotas.module';
 import { ConfigWebhooksModule } from './config-webhooks/config-webhooks.module';
 import { FirebaseAuthGuard }    from './common/guards/firebase-auth.guard';
+import { OrganizationsClientModule } from './organizations-client/organizations-client.module';
 
 @Module({
   imports: [

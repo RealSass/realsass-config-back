@@ -32,7 +32,7 @@ export class ConfigFlagsController {
 
   @Patch(':key')
   @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
+  @Roles('OWNER', 'COLLABORATOR')
   update(
     @Tenant() tenant: TenantContext,
     @Param('key') key: string,

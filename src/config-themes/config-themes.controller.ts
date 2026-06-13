@@ -31,7 +31,7 @@ export class ConfigThemesController {
 
   @Post('themes')
   @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
+  @Roles('OWNER', 'COLLABORATOR')
   @HttpCode(HttpStatus.CREATED)
   create(@Tenant() tenant: TenantContext, @Body() dto: CreateThemeDto) {
     return this.svc.create(tenant.organizationId, tenant.userId, dto);
@@ -39,7 +39,7 @@ export class ConfigThemesController {
 
   @Patch('themes/:id/activate')
   @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
+  @Roles('OWNER', 'COLLABORATOR')
   activate(@Tenant() tenant: TenantContext, @Param('id') id: string) {
     return this.svc.activate(tenant.organizationId, tenant.userId, id);
   }

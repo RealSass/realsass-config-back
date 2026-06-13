@@ -20,7 +20,7 @@ export class ConfigQuotasController {
 
   @Get()
   @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
+  @Roles('OWNER', 'COLLABORATOR')
   getForOrg(@Tenant() t: TenantContext) {
     return this.svc.getForOrg(t.organizationId);
   }

@@ -1,10 +1,15 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { MembershipRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { PrismaService } from '../../prisma/prisma.service';
+import { FULL_PERMISSIONS, type TenantContext } from '../types/tenant-context';
 
 const KEY_PREFIX = 'sk_live_';
 
+/**
+ * API Keys propias de config-service (scoped a una organizationId de
+ * real-back, sin FK local — esa tabla ya no es source-of-truth de orgs).
+ * Otorgan acceso de nivel OWNER dentro del scope declarado.
+ */
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
   constructor(private readonly prisma: PrismaService) {}
@@ -23,7 +28,6 @@ export class ApiKeyGuard implements CanActivate {
         revokedAt: null,
         OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       },
-      include: { organization: true },
     });
 
     for (const candidate of candidates) {
@@ -33,12 +37,14 @@ export class ApiKeyGuard implements CanActivate {
           .update({ where: { id: candidate.id }, data: { lastUsedAt: new Date() } })
           .catch(() => null);
 
-        req.tenant = {
+        const tenantCtx: TenantContext = {
+          userId:         `api-key:${candidate.id}`,
           organizationId: candidate.organizationId,
-          role:           MembershipRole.MEMBER,
+          role:           'OWNER',
+          permissions:    FULL_PERMISSIONS,
           apiKeyScopes:   candidate.scopes as string[],
-          productPermissions: {},
         };
+        req.tenant = tenantCtx;
         return true;
       }
     }

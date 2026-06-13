@@ -2,9 +2,14 @@
 // schema.prisma — Config Service
 // Stack: NestJS 11 · Prisma 7 · PostgreSQL · pnpm
 //
-// Después de copiar este archivo:
-//   pnpm prisma migrate dev --name config_module_v1
-//   pnpm db:seed
+// Identidad/organizaciones/membresías YA NO viven acá: real-back
+// (organizaciones-back) es la única fuente de verdad. Este servicio solo
+// guarda configuración por `organizationId` (string plano, sin FK local),
+// resuelta vía OrganizationsClientService -> GET /auth/organization-access.
+//
+// Después de actualizar este archivo:
+//   pnpm prisma migrate dev --name decouple_identity_from_real_back
+//   pnpm prisma generate
 // =============================================================================
 
 generator client {
@@ -17,244 +22,35 @@ datasource db {
 }
 
 // =============================================================================
-// ENUMS
+// MODELOS DEL CONFIG SERVICE
 // =============================================================================
-
-// Rol jerárquico dentro de una organización.
-// OWNER  → creador, control total, no puede ser removido
-// ADMIN  → gestiona miembros y configuración, no puede tocar billing
-// MEMBER → acceso operativo según productPermissions
-// VIEWER → solo lectura en los módulos habilitados
-enum MembershipRole {
-  OWNER
-  ADMIN
-  MEMBER
-  VIEWER
-}
-
-// Estado de una invitación a la organización.
-enum InvitationStatus {
-  PENDING   // enviada, esperando que el invitado acepte
-  ACCEPTED  // aceptada, membership creada
-  EXPIRED   // pasaron 7 días sin aceptar
-  REVOKED   // el owner la canceló manualmente
-}
-
-// Scopes disponibles para API Keys.
-// Al agregar un nuevo sistema, agregar su scope aquí y hacer migrate.
-enum ApiKeyScope {
-  // Owner dashboard
-  READ_ORG
-  WRITE_ORG
-  MANAGE_MEMBERS
-  // Sistema de pagos
-  READ_PAYMENTS
-  WRITE_PAYMENTS
-  // Chat IA
-  READ_CHAT
-  WRITE_CHAT
-  // Ad Optimizer
-  READ_ADS
-  WRITE_ADS
-  // Config Service
-  READ_CONFIG
-  WRITE_CONFIG
-  // Acceso completo (super-scope, para integraciones internas)
-  FULL_ACCESS
-}
-
-// =============================================================================
-// MODELOS BASE (idénticos al owner-dashboard)
-// =============================================================================
-
-// ─── User ─────────────────────────────────────────────────────────────────────
-
-model User {
-  id             String  @id @default(uuid())
-  firebaseUid    String  @unique
-  email          String  @unique
-  displayName    String?
-  avatarUrl      String?
-  affiliateCode  String? @unique
-  referredByCode String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  memberships   Membership[]
-  invitations   Invitation[]  @relation("InvitedUser")
-  affiliateData AffiliateData?
-  auditLogs     AuditLog[]
-
-  @@map("users")
-}
-
-// ─── Organization ─────────────────────────────────────────────────────────────
-
-model Organization {
-  id          String  @id @default(uuid())
-  name        String?
-  slug        String  @unique
-  description String?
-  logoUrl     String?
-  website     String?
-  phone       String?
-  address     String?
-
-  // Qué sistemas tiene habilitados esta org.
-  // { "payments": true, "chat": true, "ads": false }
-  enabledProducts Json @default("{}")
-
-  // Metadata libre para que los sistemas externos guarden config propia.
-  // { "payments": { "defaultCurrency": "ARS" }, "chat": { "defaultModel": "llama3-70b" } }
-  systemSettings Json @default("{}")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relaciones base
-  memberships Membership[]
-  invitations Invitation[]
-  apiKeys     ApiKey[]
-  auditLogs   AuditLog[]
-
-  // Relaciones del Config Service
-  themeConfigs     ThemeConfig[]
-  secretConfigs    SecretConfig[]
-  featureFlags     FeatureFlag[]
-  contentTemplates ContentTemplate[]
-  quotaConfigs     QuotaConfig[]
-  webhookEndpoints WebhookEndpoint[]
-  configAuditLogs  ConfigAuditLog[]
-
-  @@map("organizations")
-}
-
-// ─── Membership ───────────────────────────────────────────────────────────────
-
-model Membership {
-  id             String         @id @default(uuid())
-  userId         String
-  organizationId String
-  role           MembershipRole @default(MEMBER)
-
-  // Permisos granulares por producto en JSONB.
-  // { "payments": { "canRead": true, "canWrite": false }, "chat": { ... } }
-  // Para OWNER y ADMIN estos permisos se ignoran (tienen acceso total).
-  productPermissions Json @default("{}")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, organizationId])
-  @@index([organizationId])
-  @@index([userId])
-  @@map("memberships")
-}
-
-// ─── Invitation ───────────────────────────────────────────────────────────────
-
-model Invitation {
-  id             String           @id @default(uuid())
-  organizationId String
-  email          String
-  role           MembershipRole   @default(MEMBER)
-  token          String           @unique @default(uuid())
-  status         InvitationStatus @default(PENDING)
-  expiresAt      DateTime
-
-  productPermissions Json @default("{}")
-
-  acceptedByUserId String?
-  acceptedAt       DateTime?
-  invitedByUserId  String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  acceptedBy   User?        @relation("InvitedUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
-
-  @@unique([organizationId, email])
-  @@index([organizationId])
-  @@index([token])
-  @@map("invitations")
-}
 
 // ─── ApiKey ───────────────────────────────────────────────────────────────────
+// API Keys propias del Config Service. organizationId referencia el id de
+// Organization en real-back (sin FK local).
 
 model ApiKey {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   organizationId String
   name           String
-  keyHash        String   @unique
+  keyHash        String    @unique
   keyPrefix      String
-  scopes         Json     @default("[]")
+  scopes         Json      @default("[]")
   description    String?
   lastUsedAt     DateTime?
   expiresAt      DateTime?
   revokedAt      DateTime?
-  createdAt      DateTime @default(now())
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
 
   @@index([organizationId])
   @@index([keyPrefix])
   @@map("api_keys")
 }
 
-// ─── AuditLog ─────────────────────────────────────────────────────────────────
-// Append-only. Registra acciones de negocio (miembros, orgs, api keys).
-// Para cambios de configuración existe ConfigAuditLog (separado).
-
-model AuditLog {
-  id             String  @id @default(uuid())
-  organizationId String?
-  userId         String?
-  action         String
-  resource       String?
-  resourceId     String?
-  metadata       Json?
-  ipAddress      String?
-  userAgent      String?
-  createdAt      DateTime @default(now())
-
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@index([organizationId, createdAt])
-  @@index([userId])
-  @@index([action])
-  @@map("audit_logs")
-}
-
-// ─── AffiliateData ────────────────────────────────────────────────────────────
-
-model AffiliateData {
-  id            String   @id @default(uuid())
-  userId        String   @unique
-  balance       Float    @default(0)
-  referralCount Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("affiliate_data")
-}
-
-// =============================================================================
-// MODELOS DEL CONFIG SERVICE
-// =============================================================================
-
 // ─── ThemeConfig ──────────────────────────────────────────────────────────────
 // Temas visuales por organización.
 // organizationId null → tema del sistema (seeds), copiable por cualquier org.
 // Solo un tema puede estar activo por org a la vez (isActive).
-// Los sistemas externos cargan el tema activo al iniciar via GET /config/theme/:orgSlug.
 
 model ThemeConfig {
   id              String  @id @default(uuid())
@@ -262,9 +58,8 @@ model ThemeConfig {
 
   name            String
   isActive        Boolean @default(false)
-  isSystemDefault Boolean @default(false) // true = seed del sistema, no borrable
+  isSystemDefault Boolean @default(false)
 
-  // Tokens de diseño
   primaryColor   String  @default("#000000")
   secondaryColor String  @default("#ffffff")
   accentColor    String?
@@ -273,12 +68,10 @@ model ThemeConfig {
   logoUrl        String?
   faviconUrl     String?
   darkMode       Boolean @default(false)
-  customCSS      String? // CSS adicional inyectado en <head>
+  customCSS      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, name])
   @@index([organizationId])
@@ -286,31 +79,26 @@ model ThemeConfig {
 }
 
 // ─── SecretConfig ─────────────────────────────────────────────────────────────
-// Secretos cifrados con AES-256-GCM (crypto nativo de Node, sin librerías).
-// El valor nunca se devuelve en claro por la API autenticada.
-// Solo GET /config/secrets/resolve/:key (con API key de sistema) descifra en runtime.
-// Audit obligatorio en toda operación: create, read, rotate, revoke.
+// Secretos cifrados con AES-256-GCM. El valor nunca se devuelve en claro.
 
 model SecretConfig {
   id             String    @id @default(uuid())
   organizationId String
 
   key            String
-  valueEncrypted String    // AES-256-GCM, base64
-  valueIv        String    // IV del cifrado, base64 (12 bytes)
-  valueTag       String    // Auth tag GCM, base64 (16 bytes)
-  keyPrefix      String    // primeros 4 chars en claro para identificación
+  valueEncrypted String
+  valueIv        String
+  valueTag       String
+  keyPrefix      String
 
   description  String?
-  systemTarget String    @default("all") // "chat" | "payments" | "ads" | "all"
+  systemTarget String    @default("all")
   isActive     Boolean   @default(true)
   rotatedAt    DateTime?
   expiresAt    DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, key])
   @@index([organizationId])
@@ -319,10 +107,6 @@ model SecretConfig {
 
 // ─── FeatureFlag ──────────────────────────────────────────────────────────────
 // Feature flags por organización o globales del sistema.
-// organizationId null → flag global (aplica como fallback si la org no tiene uno propio).
-// conditions → reglas evaluadas en runtime: { "role": "OWNER" } | { "plan": "pro" }
-// rolloutPercentage → gradual rollout basado en hash del organizationId (0-100).
-// Los sistemas cachean flags en Redis (TTL 60s) y escuchan webhook config.flag.changed.
 
 model FeatureFlag {
   id             String  @id @default(uuid())
@@ -331,14 +115,12 @@ model FeatureFlag {
   key               String
   enabled           Boolean @default(false)
   description       String?
-  systemTarget      String  @default("all") // "chat" | "payments" | "ads" | "all"
+  systemTarget      String  @default("all")
   rolloutPercentage Int     @default(100)
-  conditions        Json    @default("{}")  // { "role": "OWNER" } | { "plan": "pro" }
+  conditions        Json    @default("{}")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, key])
   @@index([organizationId])
@@ -347,9 +129,6 @@ model FeatureFlag {
 
 // ─── ContentTemplate ──────────────────────────────────────────────────────────
 // Plantillas de contenido con variables {{nombre}}.
-// organizationId null → plantilla del sistema (seeds).
-// Resolución: se busca primero la plantilla de la org; si no existe, cae al sistema.
-// renderTemplate(key, variables) disponible como método del ConfigService.
 
 model ContentTemplate {
   id             String  @id @default(uuid())
@@ -357,16 +136,14 @@ model ContentTemplate {
 
   key             String
   name            String
-  content         String  // texto con variables {{nombre}}
-  category        String  @default("email") // "email" | "chat" | "notification" | "ui"
+  content         String
+  category        String  @default("email")
   systemTarget    String  @default("all")
-  isSystemDefault Boolean @default(false)   // true = seed del sistema
-  variables       Json    @default("[]")    // string[] — lista de vars disponibles
+  isSystemDefault Boolean @default(false)
+  variables       Json    @default("[]")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, key])
   @@index([organizationId])
@@ -374,34 +151,20 @@ model ContentTemplate {
 }
 
 // ─── QuotaConfig ──────────────────────────────────────────────────────────────
-// Quotas y límites por organización y recurso.
-// limit = -1 → ilimitado (plan enterprise).
-// currentUsage se incrementa/decrementa atómicamente (Redis + DB sync).
-// alertAt → % de uso que dispara evento quota.alert (default 80).
-// resetAt → fecha en que currentUsage se resetea (quotas mensuales).
-//
-// Recursos estándar: members | api_keys | monthly_api_calls |
-//                    storage_mb | chat_messages | ad_campaigns
-//
-// Límites por plan (defaults del seed):
-//   free:       members:3, api_keys:2, monthly_api_calls:1000
-//   pro:        members:20, api_keys:10, monthly_api_calls:50000
-//   enterprise: todo -1 (ilimitado)
+// Quotas y límites por organización y recurso. limit = -1 → ilimitado.
 
 model QuotaConfig {
   id             String    @id @default(uuid())
   organizationId String
 
   resource     String
-  limit        Int               // -1 = ilimitado
+  limit        Int
   currentUsage Int       @default(0)
-  alertAt      Int       @default(80)  // % para disparar alerta
-  resetAt      DateTime?              // para quotas mensuales
+  alertAt      Int       @default(80)
+  resetAt      DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, resource])
   @@index([organizationId])
@@ -410,24 +173,15 @@ model QuotaConfig {
 
 // ─── WebhookEndpoint ──────────────────────────────────────────────────────────
 // Webhooks outbound configurados por la organización.
-// secretHash → bcrypt del HMAC secret (nunca se devuelve en claro).
-// secretPrefix → primeros 6 chars para identificación visual por el owner.
-// events → string[] de eventos suscritos. "*" = todos los eventos.
-// Payload firmado con HMAC-SHA256, header X-Webhook-Signature.
-// Delivery con retry exponencial via BullMQ (3 intentos, backoff 1s).
-//
-// Eventos disponibles:
-//   config.changed | member.joined | member.removed |
-//   quota.exceeded | secret.rotated | flag.changed | webhook.test
 
 model WebhookEndpoint {
   id             String    @id @default(uuid())
   organizationId String
 
   url          String
-  events       Json      @default("[]") // string[]
-  secretHash   String                   // bcrypt del HMAC secret
-  secretPrefix String                   // primeros 6 chars en claro
+  events       Json      @default("[]")
+  secretHash   String
+  secretPrefix String
   isActive     Boolean   @default(true)
   description  String?
 
@@ -438,7 +192,6 @@ model WebhookEndpoint {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   deliveryLogs WebhookDeliveryLog[]
 
   @@index([organizationId])
@@ -446,20 +199,17 @@ model WebhookEndpoint {
 }
 
 // ─── WebhookDeliveryLog ───────────────────────────────────────────────────────
-// Log de cada intento de entrega de un webhook.
-// Guarda los últimos 50 por endpoint (configurable via BullMQ removeOnComplete).
-// Nunca se borra manualmente — limpieza automática por BullMQ.
 
 model WebhookDeliveryLog {
   id        String @id @default(uuid())
   webhookId String
 
   event      String
-  statusCode Int?    // HTTP status de la respuesta del destino
+  statusCode Int?
   success    Boolean
-  duration   Int?    // ms
+  duration   Int?
   attempt    Int     @default(1)
-  error      String? // mensaje de error si falló
+  error      String?
 
   createdAt DateTime @default(now())
 
@@ -471,19 +221,7 @@ model WebhookDeliveryLog {
 
 // ─── ConfigAuditLog ───────────────────────────────────────────────────────────
 // Audit log específico del módulo de configuración.
-// Separado del AuditLog general (que registra acciones de negocio).
-//
-// Retención diferenciada:
-//   configType "secret" → 1 año
-//   resto               → 90 días
-//
-// Reglas de seguridad:
-//   - previousValue/newValue para secretos siempre guardados como "[CIFRADO]"
-//   - diff es JSON legible sin valores sensibles
-//   - el campo action "read" se registra cuando un sistema externo resuelve un secreto
-//
-// configType: "theme" | "secret" | "flag" | "template" | "quota" | "webhook"
-// action:     "create" | "update" | "delete" | "rotate" | "activate" | "read"
+// userId es el id de usuario en real-back (sin FK local).
 
 model ConfigAuditLog {
   id             String  @id @default(uuid())
@@ -494,15 +232,13 @@ model ConfigAuditLog {
   configKey  String?
   action     String
 
-  previousValue String? // "[CIFRADO]" si es secreto
-  newValue      String? // "[CIFRADO]" si es secreto
-  diff          Json?   // diff legible sin valores sensibles
+  previousValue String?
+  newValue      String?
+  diff          Json?
   reason        String?
   ipAddress     String?
 
   createdAt DateTime @default(now())
-
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
 
   @@index([organizationId, createdAt])
   @@index([configType])

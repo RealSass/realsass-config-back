@@ -2,22 +2,24 @@ import {
   CanActivate, ExecutionContext, ForbiddenException, Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { MembershipRole } from '@prisma/client';
+import type { TenantContext, TenantRole } from '../types/tenant-context';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
-const HIERARCHY: Record<string, number> = { OWNER: 4, ADMIN: 3, MEMBER: 2, VIEWER: 1 };
+// real-back solo conoce dos roles: OWNER (dueño de la organización) y
+// COLLABORATOR (con permisos granulares vía TenantContext.permissions).
+const HIERARCHY: Record<TenantRole, number> = { OWNER: 2, COLLABORATOR: 1 };
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(ctx: ExecutionContext): boolean {
-    const required = this.reflector.getAllAndOverride<MembershipRole[]>(ROLES_KEY, [
+    const required = this.reflector.getAllAndOverride<TenantRole[]>(ROLES_KEY, [
       ctx.getHandler(), ctx.getClass(),
     ]);
     if (!required?.length) return true;
 
-    const { tenant } = ctx.switchToHttp().getRequest();
+    const { tenant } = ctx.switchToHttp().getRequest() as { tenant?: TenantContext };
     if (!tenant) throw new ForbiddenException('Tenant context requerido');
 
     const userLevel = HIERARCHY[tenant.role] ?? 0;
