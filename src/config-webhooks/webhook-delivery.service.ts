@@ -1,13 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { OnEvent } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 
-const TIMEOUT = Number(process.env['WEBHOOK_DELIVERY_TIMEOUT'] ?? 5000);
-
 export const WEBHOOK_QUEUE = 'webhook-delivery';
+
+const BULL_ENABLED = process.env['BULL_ENABLED'] === 'true';
 
 @Injectable()
 export class WebhookDeliveryService {
@@ -15,8 +15,15 @@ export class WebhookDeliveryService {
 
   constructor(
     private readonly prisma: PrismaService,
-    @InjectQueue(WEBHOOK_QUEUE) private readonly queue: Queue,
-  ) {}
+    // @Optional() permite que NestJS no falle si la cola no está registrada
+    // (cuando BULL_ENABLED=false el BullModule no registra la cola y el
+    //  token de inyección no existe — sin @Optional() el módulo no arrancaría)
+    @Optional() @InjectQueue(WEBHOOK_QUEUE) private readonly queue: Queue | null,
+  ) {
+    if (!BULL_ENABLED) {
+      this.logger.warn('BullMQ deshabilitado (BULL_ENABLED != true) — webhooks en modo no-op');
+    }
+  }
 
   @OnEvent('config.theme.changed')
   @OnEvent('config.flag.changed')
@@ -25,11 +32,16 @@ export class WebhookDeliveryService {
   @OnEvent('member.joined')
   @OnEvent('member.removed')
   async onConfigEvent(payload: { organizationId: string; [key: string]: any }) {
-    const eventName = 'config.changed';
-    await this.dispatch(payload.organizationId, eventName, payload);
+    await this.dispatch(payload.organizationId, 'config.changed', payload);
   }
 
   async dispatch(organizationId: string, event: string, payload: unknown) {
+    // Sin BullMQ: no-op — los webhooks se entregarán cuando BULL_ENABLED=true en prod
+    if (!BULL_ENABLED || !this.queue) {
+      this.logger.debug(`[no-op] Webhook omitido (BULL_ENABLED=false): ${event} para org ${organizationId}`);
+      return;
+    }
+
     const webhooks = await this.prisma.webhookEndpoint.findMany({
       where: { organizationId, isActive: true },
     });
@@ -42,8 +54,8 @@ export class WebhookDeliveryService {
         'deliver',
         { webhookId: wh.id, event, payload, url: wh.url, secretHash: wh.secretHash },
         {
-          attempts: Number(process.env['WEBHOOK_MAX_RETRIES'] ?? 3),
-          backoff:  { type: 'exponential', delay: 1000 },
+          attempts:         Number(process.env['WEBHOOK_MAX_RETRIES'] ?? 3),
+          backoff:          { type: 'exponential', delay: 1000 },
           removeOnComplete: 100,
           removeOnFail:     200,
         },
