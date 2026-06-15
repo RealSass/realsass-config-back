@@ -1,4 +1,7 @@
-import { Controller, Get, Patch, Param, Body, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller, Get, Patch, Param, Body,
+  UseGuards, Query, Headers, NotFoundException,
+} from '@nestjs/common';
 import { ConfigFlagsService } from './config-flags.service';
 import { UpdateFlagDto } from './dto/update-flag.dto';
 import { Tenant } from '../common/decorators/tenant.decorator';
@@ -13,12 +16,14 @@ import { Public } from '../common/decorators/public.decorator';
 export class ConfigFlagsController {
   constructor(private readonly svc: ConfigFlagsService) {}
 
+  // ── Ruta autenticada: lista flags del tenant actual (vía FirebaseAuthGuard + TenantGuard)
   @Get()
   @UseGuards(TenantGuard, RolesGuard)
   list(@Tenant() tenant: TenantContext) {
     return this.svc.list(tenant.organizationId);
   }
 
+  // ── Ruta pública por orgId en path (usada por frontends con API key)
   @Public()
   @Get(':orgId')
   @UseGuards(ApiKeyGuard)
@@ -27,17 +32,32 @@ export class ConfigFlagsController {
     @Query('role')  role?: string,
     @Query('plan')  plan?: string,
   ) {
-    return this.svc.getForOrg(orgId, { role, plan });
+    return this.svc.getForOrg(orgId, role, plan);
   }
 
-  @Patch(':key')
+  // ── Ruta pública por orgId en header x-organization-id (para llamadas server-side)
+  // Útil cuando el frontend no puede poner orgId en el path
+  @Public()
+  @Get('public/by-org')
+  @UseGuards(ApiKeyGuard)
+  getForOrgByHeader(
+    @Headers('x-organization-id') orgId: string,
+    @Query('role') role?: string,
+    @Query('plan') plan?: string,
+  ) {
+    if (!orgId) throw new NotFoundException('x-organization-id header requerido');
+    return this.svc.getForOrg(orgId, role, plan);
+  }
+
+  // ── Mutaciones (solo OWNER autenticado)
+  @Patch(':id')
   @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'COLLABORATOR')
+  @Roles('OWNER')
   update(
     @Tenant() tenant: TenantContext,
-    @Param('key') key: string,
+    @Param('id') id: string,
     @Body() dto: UpdateFlagDto,
   ) {
-    return this.svc.update(tenant.organizationId, tenant.userId, key, dto);
+    return this.svc.update(tenant.organizationId, id, dto);
   }
 }
