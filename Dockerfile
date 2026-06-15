@@ -1,7 +1,5 @@
 # =============================================================================
 # Dockerfile — real-config-back
-# Basado en el patrón de real-dashboard-back que funciona en producción.
-# Agrega: prisma migrate deploy antes de arrancar el servidor.
 # =============================================================================
 
 # ── Etapa 1: deps ─────────────────────────────────────────────────────────────
@@ -22,8 +20,6 @@ RUN corepack enable && corepack prepare pnpm@10.11.1 --activate
 
 WORKDIR /app
 
-# DATABASE_URL ficticia solo para que prisma generate no falle en build time
-# El valor real viene de Railway en runtime
 ARG DATABASE_URL="postgresql://build:build@localhost:5432/build"
 ARG FIREBASE_PROJECT_ID
 ARG FIREBASE_CLIENT_EMAIL
@@ -40,7 +36,8 @@ COPY . .
 
 RUN pnpm prisma generate && pnpm run build
 
-RUN test -f dist/src/main.js || (echo "ERROR: dist/src/main.js no generado" && exit 1)
+# tsconfig: rootDir=./src outDir=./dist → src/main.ts compila a dist/main.js
+RUN test -f dist/main.js || (echo "ERROR: dist/main.js no generado" && exit 1)
 
 # ── Etapa 3: runner ───────────────────────────────────────────────────────────
 FROM node:22-alpine AS runner
@@ -63,6 +60,4 @@ USER nestjs
 EXPOSE 3001
 ENV PORT=3001
 
-# migrate deploy aplica las migraciones pendientes con la DATABASE_URL real de Railway
-# luego arranca el servidor normalmente
-CMD ["dumb-init", "sh", "-c", "npx prisma migrate deploy && node dist/src/main"]
+CMD ["dumb-init", "sh", "-c", "npx prisma migrate deploy && node dist/main"]
