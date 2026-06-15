@@ -1,59 +1,68 @@
 # =============================================================================
-# Dockerfile — Config Service
-# Stack: NestJS · Prisma · PostgreSQL · Redis · pnpm · Node 22
+# Dockerfile — real-config-back
+# Basado en el patrón de real-dashboard-back que funciona en producción.
+# Agrega: prisma migrate deploy antes de arrancar el servidor.
 # =============================================================================
 
-# ── Etapa 1: builder ──────────────────────────────────────────────────────────
+# ── Etapa 1: deps ─────────────────────────────────────────────────────────────
+FROM node:22-alpine AS deps
+
+RUN corepack enable && corepack prepare pnpm@10.11.1 --activate
+
+WORKDIR /app
+
+COPY package.json .npmrc* ./
+
+RUN pnpm install --no-frozen-lockfile
+
+# ── Etapa 2: builder ──────────────────────────────────────────────────────────
 FROM node:22-alpine AS builder
 
+RUN corepack enable && corepack prepare pnpm@10.11.1 --activate
+
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# DATABASE_URL ficticia solo para que prisma generate no falle en build time
+# El valor real viene de Railway en runtime
+ARG DATABASE_URL="postgresql://build:build@localhost:5432/build"
+ARG FIREBASE_PROJECT_ID
+ARG FIREBASE_CLIENT_EMAIL
+ARG FIREBASE_PRIVATE_KEY
 
-COPY package.json pnpm-lock.yaml ./
-COPY prisma ./prisma
+ENV DATABASE_URL=$DATABASE_URL
+ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
+ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
+ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
+ENV NODE_ENV=development
 
-RUN pnpm install --frozen-lockfile --ignore-scripts
-
-RUN pnpm prisma generate
-
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# nest es un shell script — llamarlo directamente, sin "node" adelante
-RUN node_modules/.bin/nest build
+RUN pnpm prisma generate && pnpm run build
 
-RUN test -f dist/main.js \
-  && echo "✓ dist/main.js ok" \
-  || (echo "✗ dist/main.js no existe" && exit 1)
+RUN test -f dist/src/main.js || (echo "ERROR: dist/src/main.js no generado" && exit 1)
 
-# ── Etapa 2: production ───────────────────────────────────────────────────────
-FROM node:22-alpine AS production
+# ── Etapa 3: runner ───────────────────────────────────────────────────────────
+FROM node:22-alpine AS runner
+
+RUN apk add --no-cache dumb-init
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+ENV NODE_ENV=production
 
-COPY package.json pnpm-lock.yaml ./
-COPY prisma ./prisma
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nestjs
 
-RUN pnpm install --frozen-lockfile --ignore-scripts --prod
+COPY --from=builder --chown=nestjs:nodejs /app/dist         ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/prisma       ./prisma
+COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
 
-COPY --from=builder /app/node_modules/.prisma        ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
-
-COPY --from=builder /app/dist ./dist
-
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-RUN chown -R appuser:appgroup /app/node_modules/.prisma \
- && chown -R appuser:appgroup /app/node_modules/@prisma
-
-USER appuser
+USER nestjs
 
 EXPOSE 3001
+ENV PORT=3001
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=3 \
-  CMD wget -qO- http://localhost:${PORT:-3001}/health || exit 1
-
-# sh -c es necesario para encadenar comandos con &&
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
+# migrate deploy aplica las migraciones pendientes con la DATABASE_URL real de Railway
+# luego arranca el servidor normalmente
+CMD ["dumb-init", "sh", "-c", "npx prisma migrate deploy && node dist/src/main"]
