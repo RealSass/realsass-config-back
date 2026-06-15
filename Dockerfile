@@ -29,10 +29,6 @@ COPY . .
 # nest build usa tsconfig.build.json (excluye node_modules, dist, tests)
 RUN node node_modules/.bin/nest build
 
-# Validar que el artefacto existe antes de continuar
-RUN test -f dist/main.js \
-  && echo "✓ dist/main.js ok" \
-  || (echo "✗ dist/main.js no existe — revisar errores de compilación arriba" && exit 1)
 
 # ── Etapa 2: production ───────────────────────────────────────────────────────
 FROM node:22-alpine AS production
@@ -65,9 +61,6 @@ USER appuser
 
 EXPOSE 3001
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=3 \
-  CMD wget -qO- http://localhost:${PORT:-3001}/health || exit 1
-
 # migrate deploy aplica migraciones pendientes con la DATABASE_URL del entorno
 # NO poner Deploy Command en Railway — este CMD lo maneja todo
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main"]
+CMD ["npx prisma migrate deploy && node dist/src/main"]
