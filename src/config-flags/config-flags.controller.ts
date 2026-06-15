@@ -24,6 +24,7 @@ export class ConfigFlagsController {
   }
 
   // ── Ruta pública por orgId en path (usada por frontends con API key)
+  // getForOrg recibe (orgId, context?) — role y plan se envuelven en context
   @Public()
   @Get(':orgId')
   @UseGuards(ApiKeyGuard)
@@ -32,11 +33,10 @@ export class ConfigFlagsController {
     @Query('role')  role?: string,
     @Query('plan')  plan?: string,
   ) {
-    return this.svc.getForOrg(orgId, role, plan);
+    return this.svc.getForOrg(orgId, { role, plan });
   }
 
   // ── Ruta pública por orgId en header x-organization-id (para llamadas server-side)
-  // Útil cuando el frontend no puede poner orgId en el path
   @Public()
   @Get('public/by-org')
   @UseGuards(ApiKeyGuard)
@@ -46,10 +46,11 @@ export class ConfigFlagsController {
     @Query('plan') plan?: string,
   ) {
     if (!orgId) throw new NotFoundException('x-organization-id header requerido');
-    return this.svc.getForOrg(orgId, role, plan);
+    return this.svc.getForOrg(orgId, { role, plan });
   }
 
   // ── Mutaciones (solo OWNER autenticado)
+  // update(organizationId, userId, key, dto) — se pasa tenant.userId
   @Patch(':id')
   @UseGuards(TenantGuard, RolesGuard)
   @Roles('OWNER')
@@ -58,6 +59,6 @@ export class ConfigFlagsController {
     @Param('id') id: string,
     @Body() dto: UpdateFlagDto,
   ) {
-    return this.svc.update(tenant.organizationId, id, dto);
+    return this.svc.update(tenant.organizationId, tenant.userId, id, dto);
   }
 }

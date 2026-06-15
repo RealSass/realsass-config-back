@@ -18,15 +18,23 @@ export class ConfigThemesService {
     private readonly emitter: EventEmitter2,
   ) {}
 
-  async getPublicTheme(orgSlug: string) {
-    const cached = await this.cache.get<any>('__public__', 'theme', orgSlug);
+  /**
+   * Tema público por organizationId.
+   *
+   * NOTA DE ARQUITECTURA: el schema de real-config-back está desacoplado de
+   * real-back — no existe tabla `organizations` local. La ruta pública
+   * GET /config/theme/:orgId recibe el organizationId directamente (UUID),
+   * no el slug. El frontend debe usar el organizationId del contexto activo.
+   *
+   * Si se necesita resolución por slug en el futuro, agregar una llamada
+   * a real-back (OrganizationsClientService) para resolver slug → id.
+   */
+  async getPublicTheme(organizationId: string) {
+    const cached = await this.cache.get<any>('__public__', 'theme', organizationId);
     if (cached) return { success: true, data: cached };
 
-    const org = await this.prisma.organization.findUnique({ where: { slug: orgSlug } });
-    if (!org) throw new NotFoundException('Organización no encontrada');
-
     let theme = await this.prisma.themeConfig.findFirst({
-      where: { organizationId: org.id, isActive: true },
+      where: { organizationId, isActive: true },
     });
 
     if (!theme) {
@@ -35,7 +43,7 @@ export class ConfigThemesService {
       });
     }
 
-    await this.cache.set('__public__', 'theme', orgSlug, theme, THEME_TTL);
+    await this.cache.set('__public__', 'theme', organizationId, theme, THEME_TTL);
     return { success: true, data: theme };
   }
 
