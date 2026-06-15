@@ -1,0 +1,38 @@
+{
+  "$schema": "https://repomix.com/repomix-config.schema.json",
+  "output": {
+    "filePath": "real-config-back.xml",
+    "style": "markdown",
+    "parsable": true,
+    "topFilesLength": 5,
+    "showLineNumbers": false,
+    "copyToClipboard": false
+  },
+  "include": [
+    "src/**/*",
+    "prisma/**/*",
+    "package.json",
+    "tsconfig.json",
+    "nest-cli.json"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "dist",
+      "node_modules",
+      ".pnpm-store",
+      "pnpm-lock.yaml",
+      "prisma/client",
+      "*.log",
+      ".env",
+      ".env.*",
+      "test/**/*",
+      "**/*.spec.ts",
+      "**/*.e2e-spec.ts"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  }
+}

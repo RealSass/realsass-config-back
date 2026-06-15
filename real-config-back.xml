@@ -1,63 +1,47 @@
-This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+This file is a merged representation of a subset of the codebase, containing specifically included files and files not matching ignore patterns, combined into a single document by Repomix.
 
-<file_summary>
-This section contains a summary of this file.
+# File Summary
 
-<purpose>
-This file contains a packed representation of the entire repository's contents.
+## Purpose
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
 It is designed to be easily consumable by AI systems for analysis, code review,
 or other automated processes.
-</purpose>
 
-<file_format>
+## File Format
 The content is organized as follows:
 1. This summary section
 2. Repository information
 3. Directory structure
 4. Repository files (if enabled)
 5. Multiple file entries, each consisting of:
-  - File path as an attribute
-  - Full contents of the file
-</file_format>
+  a. A header with the file path (## File: path/to/file)
+  b. The full contents of the file in a code block
 
-<usage_guidelines>
+## Usage Guidelines
 - This file should be treated as read-only. Any changes should be made to the
   original repository files, not this packed version.
 - When processing this file, use the file path to distinguish
   between different files in the repository.
 - Be aware that this file may contain sensitive information. Handle it with
   the same level of security as you would the original repository.
-</usage_guidelines>
 
-<notes>
+## Notes
 - Some files may have been excluded based on .gitignore rules and Repomix's configuration
 - Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: src/**/*, prisma/**/*, package.json, tsconfig.json, nest-cli.json
+- Files matching these patterns are excluded: dist, node_modules, .pnpm-store, pnpm-lock.yaml, prisma/client, *.log, .env, .env.*, test/**/*, **/*.spec.ts, **/*.e2e-spec.ts
 - Files matching patterns in .gitignore are excluded
 - Files matching default ignore patterns are excluded
 - Files are sorted by Git change count (files with more changes are at the bottom)
-</notes>
 
-</file_summary>
-
-<directory_structure>
-.gitignore
-.npmrc
-.prettierrc
-Dockerfile
-eslint.config.mjs
+# Directory Structure
+```
 nest-cli.json
 package.json
-pnpm-workspace.yaml
-prisma.config.ts
 prisma/migrations/20260501005631_config_module_v1/migration.sql
+prisma/migrations/20260612120000_decouple_identity_from_real_back/migration.sql
 prisma/migrations/migration_lock.toml
 prisma/schema.prisma
-prisma/seed.d.ts
-prisma/seed.js
-prisma/seed.js.map
-prisma/seed.ts
-README.md
-src/app.controller.spec.ts
 src/app.controller.ts
 src/app.module.ts
 src/app.service.ts
@@ -105,126 +89,20 @@ src/config-webhooks/webhook-delivery.processor.ts
 src/config-webhooks/webhook-delivery.service.ts
 src/firebase/firebase.module.ts
 src/main.ts
+src/organizations-client/organizations-client.module.ts
+src/organizations-client/organizations-client.service.ts
+src/organizations-client/types/organization-access.types.ts
 src/prisma/prisma.module.ts
 src/prisma/prisma.service.ts
 src/redis/redis.module.ts
 src/redis/redis.service.ts
-test/app.e2e-spec.ts
-test/jest-e2e.json
-tsconfig.build.json
 tsconfig.json
-</directory_structure>
+```
 
-<files>
-This section contains the contents of the repository's files.
+# Files
 
-<file path=".gitignore">
-# compiled output
-/dist
-/node_modules
-/build
-
-# Logs
-logs
-*.log
-npm-debug.log*
-pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# OS
-.DS_Store
-
-# Tests
-/coverage
-/.nyc_output
-
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
-# temp directory
-.temp
-.tmp
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Diagnostic reports (https://nodejs.org/api/report.html)
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-
-/generated/prisma
-</file>
-
-<file path=".prettierrc">
-{
-  "singleQuote": true,
-  "trailingComma": "all"
-}
-</file>
-
-<file path="eslint.config.mjs">
-// @ts-check
-import eslint from '@eslint/js';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
-
-export default tseslint.config(
-  {
-    ignores: ['eslint.config.mjs'],
-  },
-  eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  eslintPluginPrettierRecommended,
-  {
-    languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.jest,
-      },
-      sourceType: 'commonjs',
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
-  {
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-floating-promises': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
-      "prettier/prettier": ["error", { endOfLine: "auto" }],
-    },
-  },
-);
-</file>
-
-<file path="nest-cli.json">
+## File: nest-cli.json
+```json
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
@@ -233,20 +111,10 @@ export default tseslint.config(
     "deleteOutDir": true
   }
 }
-</file>
+```
 
-<file path="prisma.config.ts">
-import 'dotenv/config';
-import { defineConfig } from 'prisma/config';
-
-export default defineConfig({
-  schema: 'prisma/schema.prisma',
-  migrations: { path: 'prisma/migrations' },
-  datasource: { url: process.env['DATABASE_URL'] },
-});
-</file>
-
-<file path="prisma/migrations/20260501005631_config_module_v1/migration.sql">
+## File: prisma/migrations/20260501005631_config_module_v1/migration.sql
+```sql
 -- CreateEnum
 CREATE TYPE "MembershipRole" AS ENUM ('OWNER', 'ADMIN', 'MEMBER', 'VIEWER');
 
@@ -651,864 +519,88 @@ ALTER TABLE "webhook_delivery_logs" ADD CONSTRAINT "webhook_delivery_logs_webhoo
 
 -- AddForeignKey
 ALTER TABLE "config_audit_logs" ADD CONSTRAINT "config_audit_logs_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-</file>
+```
 
-<file path="prisma/migrations/migration_lock.toml">
+## File: prisma/migrations/20260612120000_decouple_identity_from_real_back/migration.sql
+```sql
+-- =============================================================================
+-- decouple_identity_from_real_back
+--
+-- real-config-back deja de tener su propia copia de users/organizations/
+-- memberships/invitations/affiliate_data/audit_logs (calcada del template
+-- del ecosistema). real-back pasa a ser la única fuente de verdad; este
+-- servicio resuelve identidad/permisos vía HTTP (GET /auth/organization-access).
+--
+-- IMPORTANTE: ejecutar contra la base de datos propia de real-config-back.
+-- Si esta migración corre sobre una base que NUNCA tuvo estas tablas
+-- (porque la migración inicial 20260501005631 no llegó a aplicarse),
+-- los DROP fallarán — en ese caso, aplicar solo desde la sección
+-- "recrear api_keys sin FK" en adelante, o limpiar manualmente.
+-- =============================================================================
+
+-- 1) Quitar FKs hacia organizations/users
+ALTER TABLE "memberships"        DROP CONSTRAINT IF EXISTS "memberships_userId_fkey";
+ALTER TABLE "memberships"        DROP CONSTRAINT IF EXISTS "memberships_organizationId_fkey";
+ALTER TABLE "invitations"        DROP CONSTRAINT IF EXISTS "invitations_organizationId_fkey";
+ALTER TABLE "invitations"        DROP CONSTRAINT IF EXISTS "invitations_acceptedByUserId_fkey";
+ALTER TABLE "api_keys"           DROP CONSTRAINT IF EXISTS "api_keys_organizationId_fkey";
+ALTER TABLE "audit_logs"         DROP CONSTRAINT IF EXISTS "audit_logs_organizationId_fkey";
+ALTER TABLE "audit_logs"         DROP CONSTRAINT IF EXISTS "audit_logs_userId_fkey";
+ALTER TABLE "affiliate_data"     DROP CONSTRAINT IF EXISTS "affiliate_data_userId_fkey";
+ALTER TABLE "theme_configs"      DROP CONSTRAINT IF EXISTS "theme_configs_organizationId_fkey";
+ALTER TABLE "secret_configs"     DROP CONSTRAINT IF EXISTS "secret_configs_organizationId_fkey";
+ALTER TABLE "feature_flags"      DROP CONSTRAINT IF EXISTS "feature_flags_organizationId_fkey";
+ALTER TABLE "content_templates"  DROP CONSTRAINT IF EXISTS "content_templates_organizationId_fkey";
+ALTER TABLE "quota_configs"      DROP CONSTRAINT IF EXISTS "quota_configs_organizationId_fkey";
+ALTER TABLE "webhook_endpoints"  DROP CONSTRAINT IF EXISTS "webhook_endpoints_organizationId_fkey";
+ALTER TABLE "config_audit_logs"  DROP CONSTRAINT IF EXISTS "config_audit_logs_organizationId_fkey";
+
+-- 2) Eliminar tablas de identidad duplicadas (y api_keys vieja, se recrea abajo)
+DROP TABLE IF EXISTS "memberships";
+DROP TABLE IF EXISTS "invitations";
+DROP TABLE IF EXISTS "affiliate_data";
+DROP TABLE IF EXISTS "audit_logs";
+DROP TABLE IF EXISTS "api_keys";
+DROP TABLE IF EXISTS "users";
+DROP TABLE IF EXISTS "organizations";
+
+-- 3) Eliminar enums de identidad ya no usados
+DROP TYPE IF EXISTS "MembershipRole";
+DROP TYPE IF EXISTS "InvitationStatus";
+DROP TYPE IF EXISTS "ApiKeyScope";
+
+-- 4) Recrear api_keys sin FK a organizations (organizationId referencia
+--    Organization.id en real-back, validado vía API, no vía FK local)
+CREATE TABLE "api_keys" (
+    "id"             TEXT NOT NULL,
+    "organizationId" TEXT NOT NULL,
+    "name"           TEXT NOT NULL,
+    "keyHash"        TEXT NOT NULL,
+    "keyPrefix"      TEXT NOT NULL,
+    "scopes"         JSONB NOT NULL DEFAULT '[]',
+    "description"    TEXT,
+    "lastUsedAt"     TIMESTAMP(3),
+    "expiresAt"      TIMESTAMP(3),
+    "revokedAt"      TIMESTAMP(3),
+    "createdAt"      TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "api_keys_pkey" PRIMARY KEY ("id")
+);
+
+CREATE UNIQUE INDEX "api_keys_keyHash_key" ON "api_keys"("keyHash");
+CREATE INDEX "api_keys_organizationId_idx" ON "api_keys"("organizationId");
+CREATE INDEX "api_keys_keyPrefix_idx" ON "api_keys"("keyPrefix");
+```
+
+## File: prisma/migrations/migration_lock.toml
+```toml
 # Please do not edit this file manually
 # It should be added in your version-control system (e.g., Git)
 provider = "postgresql"
-</file>
-
-<file path="prisma/schema.prisma">
-// =============================================================================
-// schema.prisma — Config Service
-// Stack: NestJS 11 · Prisma 7 · PostgreSQL · pnpm
-//
-// Después de copiar este archivo:
-//   pnpm prisma migrate dev --name config_module_v1
-//   pnpm db:seed
-// =============================================================================
-
-generator client {
-  provider   = "prisma-client-js"
-  engineType = "client"
-}
-
-datasource db {
-  provider = "postgresql"
-}
-
-// =============================================================================
-// ENUMS
-// =============================================================================
-
-// Rol jerárquico dentro de una organización.
-// OWNER  → creador, control total, no puede ser removido
-// ADMIN  → gestiona miembros y configuración, no puede tocar billing
-// MEMBER → acceso operativo según productPermissions
-// VIEWER → solo lectura en los módulos habilitados
-enum MembershipRole {
-  OWNER
-  ADMIN
-  MEMBER
-  VIEWER
-}
-
-// Estado de una invitación a la organización.
-enum InvitationStatus {
-  PENDING   // enviada, esperando que el invitado acepte
-  ACCEPTED  // aceptada, membership creada
-  EXPIRED   // pasaron 7 días sin aceptar
-  REVOKED   // el owner la canceló manualmente
-}
-
-// Scopes disponibles para API Keys.
-// Al agregar un nuevo sistema, agregar su scope aquí y hacer migrate.
-enum ApiKeyScope {
-  // Owner dashboard
-  READ_ORG
-  WRITE_ORG
-  MANAGE_MEMBERS
-  // Sistema de pagos
-  READ_PAYMENTS
-  WRITE_PAYMENTS
-  // Chat IA
-  READ_CHAT
-  WRITE_CHAT
-  // Ad Optimizer
-  READ_ADS
-  WRITE_ADS
-  // Config Service
-  READ_CONFIG
-  WRITE_CONFIG
-  // Acceso completo (super-scope, para integraciones internas)
-  FULL_ACCESS
-}
-
-// =============================================================================
-// MODELOS BASE (idénticos al owner-dashboard)
-// =============================================================================
-
-// ─── User ─────────────────────────────────────────────────────────────────────
-
-model User {
-  id             String  @id @default(uuid())
-  firebaseUid    String  @unique
-  email          String  @unique
-  displayName    String?
-  avatarUrl      String?
-  affiliateCode  String? @unique
-  referredByCode String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  memberships   Membership[]
-  invitations   Invitation[]  @relation("InvitedUser")
-  affiliateData AffiliateData?
-  auditLogs     AuditLog[]
-
-  @@map("users")
-}
-
-// ─── Organization ─────────────────────────────────────────────────────────────
-
-model Organization {
-  id          String  @id @default(uuid())
-  name        String?
-  slug        String  @unique
-  description String?
-  logoUrl     String?
-  website     String?
-  phone       String?
-  address     String?
-
-  // Qué sistemas tiene habilitados esta org.
-  // { "payments": true, "chat": true, "ads": false }
-  enabledProducts Json @default("{}")
-
-  // Metadata libre para que los sistemas externos guarden config propia.
-  // { "payments": { "defaultCurrency": "ARS" }, "chat": { "defaultModel": "llama3-70b" } }
-  systemSettings Json @default("{}")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relaciones base
-  memberships Membership[]
-  invitations Invitation[]
-  apiKeys     ApiKey[]
-  auditLogs   AuditLog[]
-
-  // Relaciones del Config Service
-  themeConfigs     ThemeConfig[]
-  secretConfigs    SecretConfig[]
-  featureFlags     FeatureFlag[]
-  contentTemplates ContentTemplate[]
-  quotaConfigs     QuotaConfig[]
-  webhookEndpoints WebhookEndpoint[]
-  configAuditLogs  ConfigAuditLog[]
-
-  @@map("organizations")
-}
-
-// ─── Membership ───────────────────────────────────────────────────────────────
-
-model Membership {
-  id             String         @id @default(uuid())
-  userId         String
-  organizationId String
-  role           MembershipRole @default(MEMBER)
-
-  // Permisos granulares por producto en JSONB.
-  // { "payments": { "canRead": true, "canWrite": false }, "chat": { ... } }
-  // Para OWNER y ADMIN estos permisos se ignoran (tienen acceso total).
-  productPermissions Json @default("{}")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, organizationId])
-  @@index([organizationId])
-  @@index([userId])
-  @@map("memberships")
-}
-
-// ─── Invitation ───────────────────────────────────────────────────────────────
-
-model Invitation {
-  id             String           @id @default(uuid())
-  organizationId String
-  email          String
-  role           MembershipRole   @default(MEMBER)
-  token          String           @unique @default(uuid())
-  status         InvitationStatus @default(PENDING)
-  expiresAt      DateTime
-
-  productPermissions Json @default("{}")
-
-  acceptedByUserId String?
-  acceptedAt       DateTime?
-  invitedByUserId  String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  acceptedBy   User?        @relation("InvitedUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
-
-  @@unique([organizationId, email])
-  @@index([organizationId])
-  @@index([token])
-  @@map("invitations")
-}
-
-// ─── ApiKey ───────────────────────────────────────────────────────────────────
-
-model ApiKey {
-  id             String   @id @default(uuid())
-  organizationId String
-  name           String
-  keyHash        String   @unique
-  keyPrefix      String
-  scopes         Json     @default("[]")
-  description    String?
-  lastUsedAt     DateTime?
-  expiresAt      DateTime?
-  revokedAt      DateTime?
-  createdAt      DateTime @default(now())
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@index([organizationId])
-  @@index([keyPrefix])
-  @@map("api_keys")
-}
-
-// ─── AuditLog ─────────────────────────────────────────────────────────────────
-// Append-only. Registra acciones de negocio (miembros, orgs, api keys).
-// Para cambios de configuración existe ConfigAuditLog (separado).
-
-model AuditLog {
-  id             String  @id @default(uuid())
-  organizationId String?
-  userId         String?
-  action         String
-  resource       String?
-  resourceId     String?
-  metadata       Json?
-  ipAddress      String?
-  userAgent      String?
-  createdAt      DateTime @default(now())
-
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@index([organizationId, createdAt])
-  @@index([userId])
-  @@index([action])
-  @@map("audit_logs")
-}
-
-// ─── AffiliateData ────────────────────────────────────────────────────────────
-
-model AffiliateData {
-  id            String   @id @default(uuid())
-  userId        String   @unique
-  balance       Float    @default(0)
-  referralCount Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("affiliate_data")
-}
-
-// =============================================================================
-// MODELOS DEL CONFIG SERVICE
-// =============================================================================
-
-// ─── ThemeConfig ──────────────────────────────────────────────────────────────
-// Temas visuales por organización.
-// organizationId null → tema del sistema (seeds), copiable por cualquier org.
-// Solo un tema puede estar activo por org a la vez (isActive).
-// Los sistemas externos cargan el tema activo al iniciar via GET /config/theme/:orgSlug.
-
-model ThemeConfig {
-  id              String  @id @default(uuid())
-  organizationId  String?
-
-  name            String
-  isActive        Boolean @default(false)
-  isSystemDefault Boolean @default(false) // true = seed del sistema, no borrable
-
-  // Tokens de diseño
-  primaryColor   String  @default("#000000")
-  secondaryColor String  @default("#ffffff")
-  accentColor    String?
-  fontFamily     String  @default("DM Sans")
-  borderRadius   String  @default("0.75rem")
-  logoUrl        String?
-  faviconUrl     String?
-  darkMode       Boolean @default(false)
-  customCSS      String? // CSS adicional inyectado en <head>
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([organizationId, name])
-  @@index([organizationId])
-  @@map("theme_configs")
-}
-
-// ─── SecretConfig ─────────────────────────────────────────────────────────────
-// Secretos cifrados con AES-256-GCM (crypto nativo de Node, sin librerías).
-// El valor nunca se devuelve en claro por la API autenticada.
-// Solo GET /config/secrets/resolve/:key (con API key de sistema) descifra en runtime.
-// Audit obligatorio en toda operación: create, read, rotate, revoke.
-
-model SecretConfig {
-  id             String    @id @default(uuid())
-  organizationId String
-
-  key            String
-  valueEncrypted String    // AES-256-GCM, base64
-  valueIv        String    // IV del cifrado, base64 (12 bytes)
-  valueTag       String    // Auth tag GCM, base64 (16 bytes)
-  keyPrefix      String    // primeros 4 chars en claro para identificación
-
-  description  String?
-  systemTarget String    @default("all") // "chat" | "payments" | "ads" | "all"
-  isActive     Boolean   @default(true)
-  rotatedAt    DateTime?
-  expiresAt    DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([organizationId, key])
-  @@index([organizationId])
-  @@map("secret_configs")
-}
-
-// ─── FeatureFlag ──────────────────────────────────────────────────────────────
-// Feature flags por organización o globales del sistema.
-// organizationId null → flag global (aplica como fallback si la org no tiene uno propio).
-// conditions → reglas evaluadas en runtime: { "role": "OWNER" } | { "plan": "pro" }
-// rolloutPercentage → gradual rollout basado en hash del organizationId (0-100).
-// Los sistemas cachean flags en Redis (TTL 60s) y escuchan webhook config.flag.changed.
-
-model FeatureFlag {
-  id             String  @id @default(uuid())
-  organizationId String?
-
-  key               String
-  enabled           Boolean @default(false)
-  description       String?
-  systemTarget      String  @default("all") // "chat" | "payments" | "ads" | "all"
-  rolloutPercentage Int     @default(100)
-  conditions        Json    @default("{}")  // { "role": "OWNER" } | { "plan": "pro" }
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([organizationId, key])
-  @@index([organizationId])
-  @@map("feature_flags")
-}
-
-// ─── ContentTemplate ──────────────────────────────────────────────────────────
-// Plantillas de contenido con variables {{nombre}}.
-// organizationId null → plantilla del sistema (seeds).
-// Resolución: se busca primero la plantilla de la org; si no existe, cae al sistema.
-// renderTemplate(key, variables) disponible como método del ConfigService.
-
-model ContentTemplate {
-  id             String  @id @default(uuid())
-  organizationId String?
-
-  key             String
-  name            String
-  content         String  // texto con variables {{nombre}}
-  category        String  @default("email") // "email" | "chat" | "notification" | "ui"
-  systemTarget    String  @default("all")
-  isSystemDefault Boolean @default(false)   // true = seed del sistema
-  variables       Json    @default("[]")    // string[] — lista de vars disponibles
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([organizationId, key])
-  @@index([organizationId])
-  @@map("content_templates")
-}
-
-// ─── QuotaConfig ──────────────────────────────────────────────────────────────
-// Quotas y límites por organización y recurso.
-// limit = -1 → ilimitado (plan enterprise).
-// currentUsage se incrementa/decrementa atómicamente (Redis + DB sync).
-// alertAt → % de uso que dispara evento quota.alert (default 80).
-// resetAt → fecha en que currentUsage se resetea (quotas mensuales).
-//
-// Recursos estándar: members | api_keys | monthly_api_calls |
-//                    storage_mb | chat_messages | ad_campaigns
-//
-// Límites por plan (defaults del seed):
-//   free:       members:3, api_keys:2, monthly_api_calls:1000
-//   pro:        members:20, api_keys:10, monthly_api_calls:50000
-//   enterprise: todo -1 (ilimitado)
-
-model QuotaConfig {
-  id             String    @id @default(uuid())
-  organizationId String
-
-  resource     String
-  limit        Int               // -1 = ilimitado
-  currentUsage Int       @default(0)
-  alertAt      Int       @default(80)  // % para disparar alerta
-  resetAt      DateTime?              // para quotas mensuales
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([organizationId, resource])
-  @@index([organizationId])
-  @@map("quota_configs")
-}
-
-// ─── WebhookEndpoint ──────────────────────────────────────────────────────────
-// Webhooks outbound configurados por la organización.
-// secretHash → bcrypt del HMAC secret (nunca se devuelve en claro).
-// secretPrefix → primeros 6 chars para identificación visual por el owner.
-// events → string[] de eventos suscritos. "*" = todos los eventos.
-// Payload firmado con HMAC-SHA256, header X-Webhook-Signature.
-// Delivery con retry exponencial via BullMQ (3 intentos, backoff 1s).
-//
-// Eventos disponibles:
-//   config.changed | member.joined | member.removed |
-//   quota.exceeded | secret.rotated | flag.changed | webhook.test
-
-model WebhookEndpoint {
-  id             String    @id @default(uuid())
-  organizationId String
-
-  url          String
-  events       Json      @default("[]") // string[]
-  secretHash   String                   // bcrypt del HMAC secret
-  secretPrefix String                   // primeros 6 chars en claro
-  isActive     Boolean   @default(true)
-  description  String?
-
-  lastTriggeredAt DateTime?
-  failureCount    Int       @default(0)
-  retryPolicy     Json      @default("{\"maxAttempts\":3,\"backoffMs\":1000}")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  deliveryLogs WebhookDeliveryLog[]
-
-  @@index([organizationId])
-  @@map("webhook_endpoints")
-}
-
-// ─── WebhookDeliveryLog ───────────────────────────────────────────────────────
-// Log de cada intento de entrega de un webhook.
-// Guarda los últimos 50 por endpoint (configurable via BullMQ removeOnComplete).
-// Nunca se borra manualmente — limpieza automática por BullMQ.
-
-model WebhookDeliveryLog {
-  id        String @id @default(uuid())
-  webhookId String
-
-  event      String
-  statusCode Int?    // HTTP status de la respuesta del destino
-  success    Boolean
-  duration   Int?    // ms
-  attempt    Int     @default(1)
-  error      String? // mensaje de error si falló
-
-  createdAt DateTime @default(now())
-
-  webhook WebhookEndpoint @relation(fields: [webhookId], references: [id], onDelete: Cascade)
-
-  @@index([webhookId, createdAt])
-  @@map("webhook_delivery_logs")
-}
-
-// ─── ConfigAuditLog ───────────────────────────────────────────────────────────
-// Audit log específico del módulo de configuración.
-// Separado del AuditLog general (que registra acciones de negocio).
-//
-// Retención diferenciada:
-//   configType "secret" → 1 año
-//   resto               → 90 días
-//
-// Reglas de seguridad:
-//   - previousValue/newValue para secretos siempre guardados como "[CIFRADO]"
-//   - diff es JSON legible sin valores sensibles
-//   - el campo action "read" se registra cuando un sistema externo resuelve un secreto
-//
-// configType: "theme" | "secret" | "flag" | "template" | "quota" | "webhook"
-// action:     "create" | "update" | "delete" | "rotate" | "activate" | "read"
-
-model ConfigAuditLog {
-  id             String  @id @default(uuid())
-  organizationId String?
-  userId         String?
-
-  configType String
-  configKey  String?
-  action     String
-
-  previousValue String? // "[CIFRADO]" si es secreto
-  newValue      String? // "[CIFRADO]" si es secreto
-  diff          Json?   // diff legible sin valores sensibles
-  reason        String?
-  ipAddress     String?
-
-  createdAt DateTime @default(now())
-
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-
-  @@index([organizationId, createdAt])
-  @@index([configType])
-  @@map("config_audit_logs")
-}
-</file>
-
-<file path="prisma/seed.d.ts">
-import 'dotenv/config';
-</file>
-
-<file path="prisma/seed.js">
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-require("dotenv/config");
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
-async function main() {
-    console.log('Sembrando datos del sistema...');
-    const themes = [
-        {
-            name: 'Default', isSystemDefault: true, isActive: false,
-            primaryColor: '#000000', secondaryColor: '#ffffff', fontFamily: 'DM Sans',
-            borderRadius: '0.75rem', darkMode: false,
-        },
-        {
-            name: 'Dark', isSystemDefault: true, isActive: false,
-            primaryColor: '#ffffff', secondaryColor: '#0a0a0a', fontFamily: 'DM Sans',
-            borderRadius: '0.75rem', darkMode: true,
-        },
-        {
-            name: 'Minimal', isSystemDefault: true, isActive: false,
-            primaryColor: '#1a1a1a', secondaryColor: '#fafafa', fontFamily: 'Inter',
-            borderRadius: '0.25rem', darkMode: false,
-        },
-        {
-            name: 'Bold', isSystemDefault: true, isActive: false,
-            primaryColor: '#4F46E5', secondaryColor: '#EEF2FF', fontFamily: 'Poppins',
-            borderRadius: '1rem', darkMode: false,
-        },
-    ];
-    for (const theme of themes) {
-        await prisma.themeConfig.upsert({
-            where: { organizationId_name: { organizationId: null, name: theme.name } },
-            update: theme,
-            create: theme,
-        });
-    }
-    console.log(`✓ ${themes.length} temas del sistema`);
-    const templates = [
-        {
-            key: 'welcome_email', name: 'Email de bienvenida',
-            category: 'email', systemTarget: 'all', isSystemDefault: true,
-            content: 'Hola {{nombre}}, bienvenido a {{organizacion}}. Tu cuenta está lista.',
-            variables: ['nombre', 'organizacion'],
-        },
-        {
-            key: 'invitation_email', name: 'Email de invitación',
-            category: 'email', systemTarget: 'all', isSystemDefault: true,
-            content: 'Hola {{nombre}}, {{invitador}} te invita a unirte a {{organizacion}}. Aceptá la invitación aquí: {{link}}',
-            variables: ['nombre', 'invitador', 'organizacion', 'link'],
-        },
-        {
-            key: 'chat_welcome_message', name: 'Mensaje de bienvenida del chat',
-            category: 'chat', systemTarget: 'chat', isSystemDefault: true,
-            content: '¡Hola {{nombre}}! Soy el asistente de {{organizacion}}. ¿En qué puedo ayudarte?',
-            variables: ['nombre', 'organizacion'],
-        },
-        {
-            key: 'notification_new_member', name: 'Notificación nuevo miembro',
-            category: 'notification', systemTarget: 'all', isSystemDefault: true,
-            content: '{{nombre}} se unió a {{organizacion}} con el rol {{rol}}.',
-            variables: ['nombre', 'organizacion', 'rol'],
-        },
-    ];
-    for (const tmpl of templates) {
-        await prisma.contentTemplate.upsert({
-            where: { organizationId_key: { organizationId: null, key: tmpl.key } },
-            update: tmpl,
-            create: tmpl,
-        });
-    }
-    console.log(`✓ ${templates.length} plantillas del sistema`);
-    const flags = [
-        { key: 'chat_enabled', enabled: false, description: 'Habilita el módulo de chat', systemTarget: 'chat' },
-        { key: 'payments_enabled', enabled: false, description: 'Habilita el módulo de pagos', systemTarget: 'payments' },
-        { key: 'ads_enabled', enabled: false, description: 'Habilita el módulo de publicidad', systemTarget: 'ads' },
-        { key: 'webhooks_enabled', enabled: true, description: 'Habilita webhooks outbound', systemTarget: 'all' },
-        { key: 'audit_log_enabled', enabled: true, description: 'Habilita el log de auditoría', systemTarget: 'all' },
-        { key: 'quota_enforcement', enabled: true, description: 'Enforce de quotas en todos los sistemas', systemTarget: 'all' },
-    ];
-    for (const flag of flags) {
-        await prisma.featureFlag.upsert({
-            where: { organizationId_key: { organizationId: null, key: flag.key } },
-            update: flag,
-            create: flag,
-        });
-    }
-    console.log(`✓ ${flags.length} feature flags globales`);
-    console.log('Seed completado.');
-}
-main()
-    .catch((e) => { console.error(e); process.exit(1); })
-    .finally(() => prisma.$disconnect());
-//# sourceMappingURL=seed.js.map
-</file>
-
-<file path="prisma/seed.js.map">
-{"version":3,"file":"seed.js","sourceRoot":"","sources":["seed.ts"],"names":[],"mappings":";;AAAA,yBAAuB;AACvB,2CAA8C;AAE9C,MAAM,MAAM,GAAG,IAAI,qBAAY,EAAE,CAAC;AAElC,KAAK,UAAU,IAAI;IACjB,OAAO,CAAC,GAAG,CAAC,gCAAgC,CAAC,CAAC;IAG9C,MAAM,MAAM,GAAG;QACb;YACE,IAAI,EAAE,SAAS,EAAE,eAAe,EAAE,IAAI,EAAE,QAAQ,EAAE,KAAK;YACvD,YAAY,EAAE,SAAS,EAAE,cAAc,EAAE,SAAS,EAAE,UAAU,EAAE,SAAS;YACzE,YAAY,EAAE,SAAS,EAAE,QAAQ,EAAE,KAAK;SACzC;QACD;YACE,IAAI,EAAE,MAAM,EAAE,eAAe,EAAE,IAAI,EAAE,QAAQ,EAAE,KAAK;YACpD,YAAY,EAAE,SAAS,EAAE,cAAc,EAAE,SAAS,EAAE,UAAU,EAAE,SAAS;YACzE,YAAY,EAAE,SAAS,EAAE,QAAQ,EAAE,IAAI;SACxC;QACD;YACE,IAAI,EAAE,SAAS,EAAE,eAAe,EAAE,IAAI,EAAE,QAAQ,EAAE,KAAK;YACvD,YAAY,EAAE,SAAS,EAAE,cAAc,EAAE,SAAS,EAAE,UAAU,EAAE,OAAO;YACvE,YAAY,EAAE,SAAS,EAAE,QAAQ,EAAE,KAAK;SACzC;QACD;YACE,IAAI,EAAE,MAAM,EAAE,eAAe,EAAE,IAAI,EAAE,QAAQ,EAAE,KAAK;YACpD,YAAY,EAAE,SAAS,EAAE,cAAc,EAAE,SAAS,EAAE,UAAU,EAAE,SAAS;YACzE,YAAY,EAAE,MAAM,EAAE,QAAQ,EAAE,KAAK;SACtC;KACF,CAAC;IAEF,KAAK,MAAM,KAAK,IAAI,MAAM,EAAE,CAAC;QAC3B,MAAM,MAAM,CAAC,WAAW,CAAC,MAAM,CAAC;YAC9B,KAAK,EAAG,EAAE,mBAAmB,EAAE,EAAE,cAAc,EAAE,IAAW,EAAE,IAAI,EAAE,KAAK,CAAC,IAAI,EAAE,EAAE;YAClF,MAAM,EAAE,KAAK;YACb,MAAM,EAAE,KAAK;SACd,CAAC,CAAC;IACL,CAAC;IACD,OAAO,CAAC,GAAG,CAAC,KAAK,MAAM,CAAC,MAAM,oBAAoB,CAAC,CAAC;IAGpD,MAAM,SAAS,GAAG;QAChB;YACE,GAAG,EAAE,eAAe,EAAE,IAAI,EAAE,qBAAqB;YACjD,QAAQ,EAAE,OAAO,EAAE,YAAY,EAAE,KAAK,EAAE,eAAe,EAAE,IAAI;YAC7D,OAAO,EAAE,uEAAuE;YAChF,SAAS,EAAE,CAAC,QAAQ,EAAE,cAAc,CAAC;SACtC;QACD;YACE,GAAG,EAAE,kBAAkB,EAAE,IAAI,EAAE,qBAAqB;YACpD,QAAQ,EAAE,OAAO,EAAE,YAAY,EAAE,KAAK,EAAE,eAAe,EAAE,IAAI;YAC7D,OAAO,EAAE,2GAA2G;YACpH,SAAS,EAAE,CAAC,QAAQ,EAAE,WAAW,EAAE,cAAc,EAAE,MAAM,CAAC;SAC3D;QACD;YACE,GAAG,EAAE,sBAAsB,EAAE,IAAI,EAAE,gCAAgC;YACnE,QAAQ,EAAE,MAAM,EAAE,YAAY,EAAE,MAAM,EAAE,eAAe,EAAE,IAAI;YAC7D,OAAO,EAAE,iFAAiF;YAC1F,SAAS,EAAE,CAAC,QAAQ,EAAE,cAAc,CAAC;SACtC;QACD;YACE,GAAG,EAAE,yBAAyB,EAAE,IAAI,EAAE,4BAA4B;YAClE,QAAQ,EAAE,cAAc,EAAE,YAAY,EAAE,KAAK,EAAE,eAAe,EAAE,IAAI;YACpE,OAAO,EAAE,2DAA2D;YACpE,SAAS,EAAE,CAAC,QAAQ,EAAE,cAAc,EAAE,KAAK,CAAC;SAC7C;KACF,CAAC;IAEF,KAAK,MAAM,IAAI,IAAI,SAAS,EAAE,CAAC;QAC7B,MAAM,MAAM,CAAC,eAAe,CAAC,MAAM,CAAC;YAClC,KAAK,EAAG,EAAE,kBAAkB,EAAE,EAAE,cAAc,EAAE,IAAW,EAAE,GAAG,EAAE,IAAI,CAAC,GAAG,EAAE,EAAE;YAC9E,MAAM,EAAE,IAAI;YACZ,MAAM,EAAE,IAAI;SACb,CAAC,CAAC;IACL,CAAC;IACD,OAAO,CAAC,GAAG,CAAC,KAAK,SAAS,CAAC,MAAM,yBAAyB,CAAC,CAAC;IAG5D,MAAM,KAAK,GAAG;QACZ,EAAE,GAAG,EAAE,cAAc,EAAS,OAAO,EAAE,KAAK,EAAE,WAAW,EAAE,4BAA4B,EAAgB,YAAY,EAAE,MAAM,EAAM;QACjI,EAAE,GAAG,EAAE,kBAAkB,EAAK,OAAO,EAAE,KAAK,EAAE,WAAW,EAAE,6BAA6B,EAAe,YAAY,EAAE,UAAU,EAAE;QACjI,EAAE,GAAG,EAAE,aAAa,EAAU,OAAO,EAAE,KAAK,EAAE,WAAW,EAAE,kCAAkC,EAAU,YAAY,EAAE,KAAK,EAAO;QACjI,EAAE,GAAG,EAAE,kBAAkB,EAAK,OAAO,EAAE,IAAI,EAAG,WAAW,EAAE,4BAA4B,EAAgB,YAAY,EAAE,KAAK,EAAO;QACjI,EAAE,GAAG,EAAE,mBAAmB,EAAI,OAAO,EAAE,IAAI,EAAG,WAAW,EAAE,8BAA8B,EAAc,YAAY,EAAE,KAAK,EAAO;QACjI,EAAE,GAAG,EAAE,mBAAmB,EAAI,OAAO,EAAE,IAAI,EAAG,WAAW,EAAE,yCAAyC,EAAG,YAAY,EAAE,KAAK,EAAO;KAClI,CAAC;IAEF,KAAK,MAAM,IAAI,IAAI,KAAK,EAAE,CAAC;QACzB,MAAM,MAAM,CAAC,WAAW,CAAC,MAAM,CAAC;YAC9B,KAAK,EAAG,EAAE,kBAAkB,EAAE,EAAE,cAAc,EAAE,IAAW,EAAE,GAAG,EAAE,IAAI,CAAC,GAAG,EAAE,EAAE;YAC9E,MAAM,EAAE,IAAI;YACZ,MAAM,EAAE,IAAI;SACb,CAAC,CAAC;IACL,CAAC;IACD,OAAO,CAAC,GAAG,CAAC,KAAK,KAAK,CAAC,MAAM,yBAAyB,CAAC,CAAC;IAExD,OAAO,CAAC,GAAG,CAAC,kBAAkB,CAAC,CAAC;AAClC,CAAC;AAED,IAAI,EAAE;KACH,KAAK,CAAC,CAAC,CAAC,EAAE,EAAE,GAAG,OAAO,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC,CAAC,OAAO,CAAC,IAAI,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC;KACpD,OAAO,CAAC,GAAG,EAAE,CAAC,MAAM,CAAC,WAAW,EAAE,CAAC,CAAC"}
-</file>
-
-<file path="prisma/seed.ts">
-import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-
-async function main() {
-  console.log('Sembrando datos del sistema...');
-
-  // ── Temas del sistema ──────────────────────────────────────────────────────
-  const themes = [
-    {
-      name: 'Default', isSystemDefault: true, isActive: false,
-      primaryColor: '#000000', secondaryColor: '#ffffff', fontFamily: 'DM Sans',
-      borderRadius: '0.75rem', darkMode: false,
-    },
-    {
-      name: 'Dark', isSystemDefault: true, isActive: false,
-      primaryColor: '#ffffff', secondaryColor: '#0a0a0a', fontFamily: 'DM Sans',
-      borderRadius: '0.75rem', darkMode: true,
-    },
-    {
-      name: 'Minimal', isSystemDefault: true, isActive: false,
-      primaryColor: '#1a1a1a', secondaryColor: '#fafafa', fontFamily: 'Inter',
-      borderRadius: '0.25rem', darkMode: false,
-    },
-    {
-      name: 'Bold', isSystemDefault: true, isActive: false,
-      primaryColor: '#4F46E5', secondaryColor: '#EEF2FF', fontFamily: 'Poppins',
-      borderRadius: '1rem', darkMode: false,
-    },
-  ];
-
-  for (const theme of themes) {
-    await prisma.themeConfig.upsert({
-      where:  { organizationId_name: { organizationId: null as any, name: theme.name } },
-      update: theme,
-      create: theme,
-    });
-  }
-  console.log(`✓ ${themes.length} temas del sistema`);
-
-  // ── Plantillas del sistema ─────────────────────────────────────────────────
-  const templates = [
-    {
-      key: 'welcome_email', name: 'Email de bienvenida',
-      category: 'email', systemTarget: 'all', isSystemDefault: true,
-      content: 'Hola {{nombre}}, bienvenido a {{organizacion}}. Tu cuenta está lista.',
-      variables: ['nombre', 'organizacion'],
-    },
-    {
-      key: 'invitation_email', name: 'Email de invitación',
-      category: 'email', systemTarget: 'all', isSystemDefault: true,
-      content: 'Hola {{nombre}}, {{invitador}} te invita a unirte a {{organizacion}}. Aceptá la invitación aquí: {{link}}',
-      variables: ['nombre', 'invitador', 'organizacion', 'link'],
-    },
-    {
-      key: 'chat_welcome_message', name: 'Mensaje de bienvenida del chat',
-      category: 'chat', systemTarget: 'chat', isSystemDefault: true,
-      content: '¡Hola {{nombre}}! Soy el asistente de {{organizacion}}. ¿En qué puedo ayudarte?',
-      variables: ['nombre', 'organizacion'],
-    },
-    {
-      key: 'notification_new_member', name: 'Notificación nuevo miembro',
-      category: 'notification', systemTarget: 'all', isSystemDefault: true,
-      content: '{{nombre}} se unió a {{organizacion}} con el rol {{rol}}.',
-      variables: ['nombre', 'organizacion', 'rol'],
-    },
-  ];
-
-  for (const tmpl of templates) {
-    await prisma.contentTemplate.upsert({
-      where:  { organizationId_key: { organizationId: null as any, key: tmpl.key } },
-      update: tmpl,
-      create: tmpl,
-    });
-  }
-  console.log(`✓ ${templates.length} plantillas del sistema`);
-
-  // ── Feature flags globales ─────────────────────────────────────────────────
-  const flags = [
-    { key: 'chat_enabled',        enabled: false, description: 'Habilita el módulo de chat',               systemTarget: 'chat'     },
-    { key: 'payments_enabled',    enabled: false, description: 'Habilita el módulo de pagos',              systemTarget: 'payments' },
-    { key: 'ads_enabled',         enabled: false, description: 'Habilita el módulo de publicidad',         systemTarget: 'ads'      },
-    { key: 'webhooks_enabled',    enabled: true,  description: 'Habilita webhooks outbound',               systemTarget: 'all'      },
-    { key: 'audit_log_enabled',   enabled: true,  description: 'Habilita el log de auditoría',             systemTarget: 'all'      },
-    { key: 'quota_enforcement',   enabled: true,  description: 'Enforce de quotas en todos los sistemas',  systemTarget: 'all'      },
-  ];
-
-  for (const flag of flags) {
-    await prisma.featureFlag.upsert({
-      where:  { organizationId_key: { organizationId: null as any, key: flag.key } },
-      update: flag,
-      create: flag,
-    });
-  }
-  console.log(`✓ ${flags.length} feature flags globales`);
-
-  console.log('Seed completado.');
-}
-
-main()
-  .catch((e) => { console.error(e); process.exit(1); })
-  .finally(() => prisma.$disconnect());
-</file>
-
-<file path="README.md">
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ pnpm install
 ```
 
-## Compile and run the project
-
-```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
-</file>
-
-<file path="src/app.controller.spec.ts">
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-
-describe('AppController', () => {
-  let appController: AppController;
-
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
-      providers: [AppService],
-    }).compile();
-
-    appController = app.get<AppController>(AppController);
-  });
-
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
-    });
-  });
-});
-</file>
-
-<file path="src/app.controller.ts">
+## File: src/app.controller.ts
+```typescript
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 
@@ -1521,61 +613,10 @@ export class AppController {
     return this.appService.getHello();
   }
 }
-</file>
+```
 
-<file path="src/app.module.ts">
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { BullModule } from '@nestjs/bullmq';
-
-import { FirebaseModule }       from './firebase/firebase.module';
-import { PrismaModule }         from './prisma/prisma.module';
-import { RedisModule }          from './redis/redis.module';
-import { ConfigCacheModule }    from './config-cache/config-cache.module';
-import { ConfigAuditModule }    from './config-audit/config-audit.module';
-import { ConfigThemesModule }   from './config-themes/config-themes.module';
-import { ConfigFlagsModule }    from './config-flags/config-flags.module';
-import { ConfigSecretsModule }  from './config-secrets/config-secrets.module';
-import { ConfigTemplatesModule } from './config-templates/config-templates.module';
-import { ConfigQuotasModule }   from './config-quotas/config-quotas.module';
-import { ConfigWebhooksModule } from './config-webhooks/config-webhooks.module';
-import { FirebaseAuthGuard }    from './common/guards/firebase-auth.guard';
-
-@Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    ThrottlerModule.forRoot([
-      { name: 'short', ttl: 1000,  limit: 15  },
-      { name: 'long',  ttl: 60000, limit: 100 },
-    ]),
-    EventEmitterModule.forRoot({ wildcard: false }),
-    BullModule.forRoot({
-      connection: { url: process.env['REDIS_URL'] ?? 'redis://localhost:6379' },
-    }),
-    FirebaseModule,
-    PrismaModule,
-    RedisModule,
-    ConfigCacheModule,
-    ConfigAuditModule,
-    ConfigThemesModule,
-    ConfigFlagsModule,
-    ConfigSecretsModule,
-    ConfigTemplatesModule,
-    ConfigQuotasModule,
-    ConfigWebhooksModule,
-  ],
-  providers: [
-    { provide: APP_GUARD, useClass: FirebaseAuthGuard },
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
-  ],
-})
-export class AppModule {}
-</file>
-
-<file path="src/app.service.ts">
+## File: src/app.service.ts
+```typescript
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -1584,9 +625,10 @@ export class AppService {
     return 'Hello World!';
   }
 }
-</file>
+```
 
-<file path="src/common/decorators/current-user.decorator.ts">
+## File: src/common/decorators/current-user.decorator.ts
+```typescript
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 export interface CurrentUserPayload {
@@ -1600,23 +642,17 @@ export const CurrentUser = createParamDecorator(
   (_: unknown, ctx: ExecutionContext): CurrentUserPayload =>
     ctx.switchToHttp().getRequest().user,
 );
-</file>
+```
 
-<file path="src/common/decorators/public.decorator.ts">
+## File: src/common/decorators/public.decorator.ts
+```typescript
 import { SetMetadata } from '@nestjs/common';
 export const IS_PUBLIC_KEY = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
-</file>
+```
 
-<file path="src/common/decorators/roles.decorator.ts">
-import { SetMetadata } from '@nestjs/common';
-import type { MembershipRole } from '@prisma/client';
-
-export const ROLES_KEY = 'roles';
-export const Roles = (...roles: MembershipRole[]) => SetMetadata(ROLES_KEY, roles);
-</file>
-
-<file path="src/common/decorators/tenant.decorator.ts">
+## File: src/common/decorators/tenant.decorator.ts
+```typescript
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import type { TenantContext } from '../types/tenant-context';
 
@@ -1624,9 +660,10 @@ export const Tenant = createParamDecorator(
   (_: unknown, ctx: ExecutionContext): TenantContext =>
     ctx.switchToHttp().getRequest().tenant,
 );
-</file>
+```
 
-<file path="src/common/exceptions/quota-exceeded.exception.ts">
+## File: src/common/exceptions/quota-exceeded.exception.ts
+```typescript
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 export class QuotaExceededException extends HttpException {
@@ -1644,59 +681,10 @@ export class QuotaExceededException extends HttpException {
     );
   }
 }
-</file>
+```
 
-<file path="src/common/guards/api-key.guard.ts">
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { MembershipRole } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
-
-const KEY_PREFIX = 'sk_live_';
-
-@Injectable()
-export class ApiKeyGuard implements CanActivate {
-  constructor(private readonly prisma: PrismaService) {}
-
-  async canActivate(ctx: ExecutionContext): Promise<boolean> {
-    const req    = ctx.switchToHttp().getRequest();
-    const rawKey = req.headers['x-api-key'] as string;
-    if (!rawKey) return false;
-
-    if (!rawKey.startsWith(KEY_PREFIX)) throw new UnauthorizedException('Formato de API Key inválido');
-
-    const keyPrefix  = rawKey.substring(0, 12);
-    const candidates = await this.prisma.apiKey.findMany({
-      where: {
-        keyPrefix,
-        revokedAt: null,
-        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
-      },
-      include: { organization: true },
-    });
-
-    for (const candidate of candidates) {
-      const valid = await bcrypt.compare(rawKey, candidate.keyHash);
-      if (valid) {
-        void this.prisma.apiKey
-          .update({ where: { id: candidate.id }, data: { lastUsedAt: new Date() } })
-          .catch(() => null);
-
-        req.tenant = {
-          organizationId: candidate.organizationId,
-          role:           MembershipRole.MEMBER,
-          apiKeyScopes:   candidate.scopes as string[],
-          productPermissions: {},
-        };
-        return true;
-      }
-    }
-    throw new UnauthorizedException('API Key inválida o expirada');
-  }
-}
-</file>
-
-<file path="src/common/guards/firebase-auth.guard.ts">
+## File: src/common/guards/firebase-auth.guard.ts
+```typescript
 import {
   CanActivate, ExecutionContext, Injectable, UnauthorizedException,
 } from '@nestjs/common';
@@ -1737,45 +725,10 @@ export class FirebaseAuthGuard implements CanActivate {
     return type === 'Bearer' ? token : undefined;
   }
 }
-</file>
+```
 
-<file path="src/common/guards/roles.guard.ts">
-import {
-  CanActivate, ExecutionContext, ForbiddenException, Injectable,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import type { MembershipRole } from '@prisma/client';
-import { ROLES_KEY } from '../decorators/roles.decorator';
-
-const HIERARCHY: Record<string, number> = { OWNER: 4, ADMIN: 3, MEMBER: 2, VIEWER: 1 };
-
-@Injectable()
-export class RolesGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
-
-  canActivate(ctx: ExecutionContext): boolean {
-    const required = this.reflector.getAllAndOverride<MembershipRole[]>(ROLES_KEY, [
-      ctx.getHandler(), ctx.getClass(),
-    ]);
-    if (!required?.length) return true;
-
-    const { tenant } = ctx.switchToHttp().getRequest();
-    if (!tenant) throw new ForbiddenException('Tenant context requerido');
-
-    const userLevel = HIERARCHY[tenant.role] ?? 0;
-    const minLevel  = Math.min(...required.map((r) => HIERARCHY[r] ?? 0));
-
-    if (userLevel < minLevel) {
-      throw new ForbiddenException(
-        `Rol requerido: ${required.join(' o ')}. Tu rol: ${tenant.role}`,
-      );
-    }
-    return true;
-  }
-}
-</file>
-
-<file path="src/common/guards/step-up.guard.ts">
+## File: src/common/guards/step-up.guard.ts
+```typescript
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 
@@ -1797,113 +750,10 @@ export class StepUpGuard implements CanActivate {
     return true;
   }
 }
-</file>
+```
 
-<file path="src/common/guards/tenant.guard.ts">
-import {
-  CanActivate, ExecutionContext, ForbiddenException, Injectable,
-} from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import type { TenantContext } from '../types/tenant-context';
-
-@Injectable()
-export class TenantGuard implements CanActivate {
-  constructor(private readonly prisma: PrismaService) {}
-
-  async canActivate(ctx: ExecutionContext): Promise<boolean> {
-    const req            = ctx.switchToHttp().getRequest();
-    const user           = req.user;
-    const organizationId = req.headers['x-organization-id'] as string;
-
-    if (!organizationId) throw new ForbiddenException('Header x-organization-id requerido');
-
-    const dbUser = await this.prisma.user.findUnique({ where: { firebaseUid: user.uid } });
-    if (!dbUser) throw new ForbiddenException('Usuario no encontrado');
-
-    const membership = await this.prisma.membership.findUnique({
-      where: { userId_organizationId: { userId: dbUser.id, organizationId } },
-    });
-    if (!membership) throw new ForbiddenException('No tenés acceso a esta organización');
-
-    const tenantCtx: TenantContext = {
-      userId:             dbUser.id,
-      organizationId,
-      role:               membership.role,
-      productPermissions: (membership.productPermissions as any) ?? {},
-    };
-    req.tenant = tenantCtx;
-    return true;
-  }
-}
-</file>
-
-<file path="src/common/types/tenant-context.ts">
-import type { MembershipRole } from '@prisma/client';
-
-export interface ProductPermissions {
-  canRead:  boolean;
-  canWrite: boolean;
-}
-
-export interface TenantProductPermissions {
-  payments?: ProductPermissions;
-  chat?:     ProductPermissions;
-  ads?:      ProductPermissions;
-  [key: string]: ProductPermissions | undefined;
-}
-
-export interface TenantContext {
-  userId:             string;
-  organizationId:     string;
-  role:               MembershipRole;
-  productPermissions: TenantProductPermissions;
-  apiKeyScopes?:      string[];
-}
-</file>
-
-<file path="src/config-audit/config-audit.controller.ts">
-import {
-  Controller, Get, Query, ParseIntPipe, DefaultValuePipe, UseGuards,
-} from '@nestjs/common';
-import { ConfigAuditService } from './config-audit.service';
-import { Tenant } from '../common/decorators/tenant.decorator';
-import type { TenantContext } from '../common/types/tenant-context';
-import { Roles } from '../common/decorators/roles.decorator';
-import { TenantGuard } from '../common/guards/tenant.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-
-@Controller('config/audit')
-@UseGuards(TenantGuard, RolesGuard)
-@Roles('OWNER', 'ADMIN')
-export class ConfigAuditController {
-  constructor(private readonly svc: ConfigAuditService) {}
-
-  @Get()
-  get(
-    @Tenant() tenant: TenantContext,
-    @Query('configType') configType?: string,
-    @Query('from')       from?: string,
-    @Query('to')         to?: string,
-    @Query('userId')     userId?: string,
-    @Query('take', new DefaultValuePipe(50), ParseIntPipe) take?: number,
-    @Query('skip', new DefaultValuePipe(0),  ParseIntPipe) skip?: number,
-  ) {
-    return this.svc.getByOrg(
-      tenant.organizationId,
-      {
-        configType,
-        from: from ? new Date(from) : undefined,
-        to:   to   ? new Date(to)   : undefined,
-        userId,
-      },
-      take,
-      skip,
-    );
-  }
-}
-</file>
-
-<file path="src/config-audit/config-audit.module.ts">
+## File: src/config-audit/config-audit.module.ts
+```typescript
 import { Module } from '@nestjs/common';
 import { ConfigAuditService } from './config-audit.service';
 import { ConfigAuditController } from './config-audit.controller';
@@ -1914,9 +764,10 @@ import { ConfigAuditController } from './config-audit.controller';
   exports:     [ConfigAuditService],
 })
 export class ConfigAuditModule {}
-</file>
+```
 
-<file path="src/config-audit/config-audit.service.ts">
+## File: src/config-audit/config-audit.service.ts
+```typescript
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
@@ -1990,17 +841,19 @@ export class ConfigAuditService {
     return { success: true, data: { logs, total, take, skip } };
   }
 }
-</file>
+```
 
-<file path="src/config-cache/config-cache.module.ts">
+## File: src/config-cache/config-cache.module.ts
+```typescript
 import { Module } from '@nestjs/common';
 import { ConfigCacheService } from './config-cache.service';
 
 @Module({ providers: [ConfigCacheService], exports: [ConfigCacheService] })
 export class ConfigCacheModule {}
-</file>
+```
 
-<file path="src/config-cache/config-cache.service.ts">
+## File: src/config-cache/config-cache.service.ts
+```typescript
 import { Injectable } from '@nestjs/common';
 import { RedisService } from '../redis/redis.service';
 
@@ -2033,55 +886,10 @@ export class ConfigCacheService {
     }
   }
 }
-</file>
+```
 
-<file path="src/config-flags/config-flags.controller.ts">
-import { Controller, Get, Patch, Param, Body, UseGuards, Query } from '@nestjs/common';
-import { ConfigFlagsService } from './config-flags.service';
-import { UpdateFlagDto } from './dto/update-flag.dto';
-import { Tenant } from '../common/decorators/tenant.decorator';
-import type { TenantContext } from '../common/types/tenant-context';
-import { Roles } from '../common/decorators/roles.decorator';
-import { TenantGuard } from '../common/guards/tenant.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { ApiKeyGuard } from '../common/guards/api-key.guard';
-import { Public } from '../common/decorators/public.decorator';
-
-@Controller('config/flags')
-export class ConfigFlagsController {
-  constructor(private readonly svc: ConfigFlagsService) {}
-
-  @Get()
-  @UseGuards(TenantGuard, RolesGuard)
-  list(@Tenant() tenant: TenantContext) {
-    return this.svc.list(tenant.organizationId);
-  }
-
-  @Public()
-  @Get(':orgId')
-  @UseGuards(ApiKeyGuard)
-  getForOrg(
-    @Param('orgId') orgId: string,
-    @Query('role')  role?: string,
-    @Query('plan')  plan?: string,
-  ) {
-    return this.svc.getForOrg(orgId, { role, plan });
-  }
-
-  @Patch(':key')
-  @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
-  update(
-    @Tenant() tenant: TenantContext,
-    @Param('key') key: string,
-    @Body() dto: UpdateFlagDto,
-  ) {
-    return this.svc.update(tenant.organizationId, tenant.userId, key, dto);
-  }
-}
-</file>
-
-<file path="src/config-flags/config-flags.module.ts">
+## File: src/config-flags/config-flags.module.ts
+```typescript
 import { Module } from '@nestjs/common';
 import { ConfigFlagsController } from './config-flags.controller';
 import { ConfigFlagsService } from './config-flags.service';
@@ -2095,9 +903,10 @@ import { ConfigAuditModule } from '../config-audit/config-audit.module';
   exports:     [ConfigFlagsService],
 })
 export class ConfigFlagsModule {}
-</file>
+```
 
-<file path="src/config-flags/config-flags.service.ts">
+## File: src/config-flags/config-flags.service.ts
+```typescript
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigCacheService } from '../config-cache/config-cache.service';
@@ -2180,9 +989,10 @@ export class ConfigFlagsService {
     return { success: true, data: updated };
   }
 }
-</file>
+```
 
-<file path="src/config-flags/dto/update-flag.dto.ts">
+## File: src/config-flags/dto/update-flag.dto.ts
+```typescript
 import { IsBoolean, IsOptional, IsInt, Min, Max, IsObject, IsString, MaxLength } from 'class-validator';
 
 export class UpdateFlagDto {
@@ -2198,64 +1008,10 @@ export class UpdateFlagDto {
   @IsObject() @IsOptional()
   conditions?: Record<string, unknown>;
 }
-</file>
+```
 
-<file path="src/config-quotas/config-quotas.controller.ts">
-import {
-  Controller, Get, Patch, Post, Param, Body, UseGuards, ParseIntPipe,
-} from '@nestjs/common';
-import { ConfigQuotasService } from './config-quotas.service';
-import { Tenant } from '../common/decorators/tenant.decorator';
-import type { TenantContext } from '../common/types/tenant-context';
-import { Roles } from '../common/decorators/roles.decorator';
-import { TenantGuard } from '../common/guards/tenant.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { ApiKeyGuard } from '../common/guards/api-key.guard';
-import { Public } from '../common/decorators/public.decorator';
-import { IsInt, Min } from 'class-validator';
-
-class UpdateLimitDto { @IsInt() @Min(1) limit: number; }
-class CheckDto       { orgId?: string; }
-
-@Controller('config/quotas')
-export class ConfigQuotasController {
-  constructor(private readonly svc: ConfigQuotasService) {}
-
-  @Get()
-  @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
-  getForOrg(@Tenant() t: TenantContext) {
-    return this.svc.getForOrg(t.organizationId);
-  }
-
-  @Patch(':resource')
-  @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER')
-  updateLimit(
-    @Tenant() t: TenantContext,
-    @Param('resource') resource: string,
-    @Body() dto: UpdateLimitDto,
-  ) {
-    return this.svc.updateLimit(t.organizationId, t.userId, resource, dto.limit);
-  }
-
-  @Public()
-  @Post(':resource/check')
-  @UseGuards(ApiKeyGuard)
-  check(@Param('resource') resource: string, @Tenant() t: TenantContext) {
-    return this.svc.check(t.organizationId, resource);
-  }
-
-  @Public()
-  @Post(':resource/increment')
-  @UseGuards(ApiKeyGuard)
-  increment(@Param('resource') resource: string, @Tenant() t: TenantContext) {
-    return this.svc.increment(t.organizationId, resource);
-  }
-}
-</file>
-
-<file path="src/config-quotas/config-quotas.module.ts">
+## File: src/config-quotas/config-quotas.module.ts
+```typescript
 import { Module } from '@nestjs/common';
 import { ConfigQuotasController } from './config-quotas.controller';
 import { ConfigQuotasService } from './config-quotas.service';
@@ -2269,9 +1025,10 @@ import { ConfigAuditModule } from '../config-audit/config-audit.module';
   exports:     [ConfigQuotasService],
 })
 export class ConfigQuotasModule {}
-</file>
+```
 
-<file path="src/config-quotas/config-quotas.service.ts">
+## File: src/config-quotas/config-quotas.service.ts
+```typescript
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigCacheService } from '../config-cache/config-cache.service';
@@ -2371,9 +1128,10 @@ export class ConfigQuotasService {
     return { success: true, data: updated };
   }
 }
-</file>
+```
 
-<file path="src/config-secrets/config-secrets.controller.ts">
+## File: src/config-secrets/config-secrets.controller.ts
+```typescript
 import {
   Controller,
   Get,
@@ -2457,9 +1215,10 @@ export class ConfigSecretsController {
     return this.svc.resolve(req.tenant.organizationId, key);
   }
 }
-</file>
+```
 
-<file path="src/config-secrets/config-secrets.module.ts">
+## File: src/config-secrets/config-secrets.module.ts
+```typescript
 import { Module } from '@nestjs/common';
 import { ConfigSecretsController } from './config-secrets.controller';
 import { ConfigSecretsService } from './config-secrets.service';
@@ -2473,9 +1232,10 @@ import { ConfigAuditModule } from '../config-audit/config-audit.module';
   exports:     [ConfigSecretsService, CryptoService],
 })
 export class ConfigSecretsModule {}
-</file>
+```
 
-<file path="src/config-secrets/config-secrets.service.ts">
+## File: src/config-secrets/config-secrets.service.ts
+```typescript
 import {
   Injectable, NotFoundException, ConflictException, ForbiddenException, Logger,
 } from '@nestjs/common';
@@ -2612,9 +1372,10 @@ export class ConfigSecretsService {
     return { value };
   }
 }
-</file>
+```
 
-<file path="src/config-secrets/crypto.service.ts">
+## File: src/config-secrets/crypto.service.ts
+```typescript
 import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 
@@ -2663,9 +1424,10 @@ export class CryptoService {
     return decipher.update(encrypted) + decipher.final('utf8');
   }
 }
-</file>
+```
 
-<file path="src/config-secrets/dto/create-secret.dto.ts">
+## File: src/config-secrets/dto/create-secret.dto.ts
+```typescript
 import { IsString, IsOptional, MaxLength, IsIn, IsDateString } from 'class-validator';
 
 export class CreateSecretDto {
@@ -2684,61 +1446,10 @@ export class CreateSecretDto {
   @IsDateString() @IsOptional()
   expiresAt?: string;
 }
-</file>
+```
 
-<file path="src/config-templates/config-templates.controller.ts">
-import {
-  Controller, Get, Post, Patch, Param, Body, UseGuards, HttpCode, HttpStatus,
-} from '@nestjs/common';
-import { ConfigTemplatesService } from './config-templates.service';
-import { CreateTemplateDto } from './dto/create-template.dto';
-import { Tenant } from '../common/decorators/tenant.decorator';
-import type { TenantContext } from '../common/types/tenant-context';
-import { Roles } from '../common/decorators/roles.decorator';
-import { TenantGuard } from '../common/guards/tenant.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { ApiKeyGuard } from '../common/guards/api-key.guard';
-import { Public } from '../common/decorators/public.decorator';
-
-@Controller('config/templates')
-export class ConfigTemplatesController {
-  constructor(private readonly svc: ConfigTemplatesService) {}
-
-  @Get()
-  @UseGuards(TenantGuard, RolesGuard)
-  list(@Tenant() t: TenantContext) {
-    return this.svc.list(t.organizationId);
-  }
-
-  @Public()
-  @Get(':key')
-  @UseGuards(ApiKeyGuard)
-  resolve(@Param('key') key: string, @Tenant() t: TenantContext) {
-    return this.svc.resolve(t.organizationId, key);
-  }
-
-  @Post()
-  @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
-  @HttpCode(HttpStatus.CREATED)
-  create(@Tenant() t: TenantContext, @Body() dto: CreateTemplateDto) {
-    return this.svc.create(t.organizationId, t.userId, dto);
-  }
-
-  @Patch(':key')
-  @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
-  update(
-    @Tenant() t: TenantContext,
-    @Param('key') key: string,
-    @Body() dto: CreateTemplateDto,
-  ) {
-    return this.svc.update(t.organizationId, t.userId, key, dto);
-  }
-}
-</file>
-
-<file path="src/config-templates/config-templates.module.ts">
+## File: src/config-templates/config-templates.module.ts
+```typescript
 import { Module } from '@nestjs/common';
 import { ConfigTemplatesController } from './config-templates.controller';
 import { ConfigTemplatesService } from './config-templates.service';
@@ -2752,9 +1463,10 @@ import { ConfigAuditModule } from '../config-audit/config-audit.module';
   exports:     [ConfigTemplatesService],
 })
 export class ConfigTemplatesModule {}
-</file>
+```
 
-<file path="src/config-templates/config-templates.service.ts">
+## File: src/config-templates/config-templates.service.ts
+```typescript
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigCacheService } from '../config-cache/config-cache.service';
@@ -2848,9 +1560,10 @@ export class ConfigTemplatesService {
     return { success: true, data: updated };
   }
 }
-</file>
+```
 
-<file path="src/config-templates/dto/create-template.dto.ts">
+## File: src/config-templates/dto/create-template.dto.ts
+```typescript
 import {
   IsString, IsOptional, IsBoolean, MaxLength, IsArray, IsIn,
 } from 'class-validator';
@@ -2874,65 +1587,10 @@ export class CreateTemplateDto {
   @IsArray() @IsOptional()
   variables?: string[];
 }
-</file>
+```
 
-<file path="src/config-themes/config-themes.controller.ts">
-import {
-  Controller, Get, Post, Patch, Delete,
-  Param, Body, UseGuards, HttpCode, HttpStatus,
-} from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
-import { ConfigThemesService } from './config-themes.service';
-import { CreateThemeDto } from './dto/create-theme.dto';
-import { Tenant } from '../common/decorators/tenant.decorator';
-import type { TenantContext } from '../common/types/tenant-context';
-import { Roles } from '../common/decorators/roles.decorator';
-import { TenantGuard } from '../common/guards/tenant.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Public } from '../common/decorators/public.decorator';
-
-@Controller('config')
-export class ConfigThemesController {
-  constructor(private readonly svc: ConfigThemesService) {}
-
-  @Public()
-  @Get('theme/:orgSlug')
-  @Throttle({ default: { ttl: 60000, limit: 10 } })
-  getPublic(@Param('orgSlug') orgSlug: string) {
-    return this.svc.getPublicTheme(orgSlug);
-  }
-
-  @Get('themes')
-  @UseGuards(TenantGuard, RolesGuard)
-  list(@Tenant() tenant: TenantContext) {
-    return this.svc.list(tenant.organizationId);
-  }
-
-  @Post('themes')
-  @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
-  @HttpCode(HttpStatus.CREATED)
-  create(@Tenant() tenant: TenantContext, @Body() dto: CreateThemeDto) {
-    return this.svc.create(tenant.organizationId, tenant.userId, dto);
-  }
-
-  @Patch('themes/:id/activate')
-  @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN')
-  activate(@Tenant() tenant: TenantContext, @Param('id') id: string) {
-    return this.svc.activate(tenant.organizationId, tenant.userId, id);
-  }
-
-  @Delete('themes/:id')
-  @UseGuards(TenantGuard, RolesGuard)
-  @Roles('OWNER')
-  remove(@Tenant() tenant: TenantContext, @Param('id') id: string) {
-    return this.svc.remove(tenant.organizationId, tenant.userId, id);
-  }
-}
-</file>
-
-<file path="src/config-themes/config-themes.module.ts">
+## File: src/config-themes/config-themes.module.ts
+```typescript
 import { Module } from '@nestjs/common';
 import { ConfigThemesController } from './config-themes.controller';
 import { ConfigThemesService } from './config-themes.service';
@@ -2946,9 +1604,10 @@ import { ConfigAuditModule } from '../config-audit/config-audit.module';
   exports:     [ConfigThemesService],
 })
 export class ConfigThemesModule {}
-</file>
+```
 
-<file path="src/config-themes/config-themes.service.ts">
+## File: src/config-themes/config-themes.service.ts
+```typescript
 import {
   Injectable, NotFoundException, ConflictException, ForbiddenException,
 } from '@nestjs/common';
@@ -3050,9 +1709,10 @@ export class ConfigThemesService {
     return { success: true, message: 'Tema eliminado' };
   }
 }
-</file>
+```
 
-<file path="src/config-themes/dto/create-theme.dto.ts">
+## File: src/config-themes/dto/create-theme.dto.ts
+```typescript
 import {
   IsString, IsOptional, IsBoolean, MaxLength, IsHexColor,
 } from 'class-validator';
@@ -3088,9 +1748,10 @@ export class CreateThemeDto {
   @IsString() @IsOptional()
   customCSS?: string;
 }
-</file>
+```
 
-<file path="src/config-webhooks/config-webhooks.controller.ts">
+## File: src/config-webhooks/config-webhooks.controller.ts
+```typescript
 import {
   Controller, Get, Post, Delete, Param, Body, UseGuards, HttpCode, HttpStatus, Query, ParseIntPipe, DefaultValuePipe,
 } from '@nestjs/common';
@@ -3138,9 +1799,10 @@ export class ConfigWebhooksController {
     return this.svc.getLogs(t.organizationId, id, take);
   }
 }
-</file>
+```
 
-<file path="src/config-webhooks/config-webhooks.module.ts">
+## File: src/config-webhooks/config-webhooks.module.ts
+```typescript
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigWebhooksController } from './config-webhooks.controller';
@@ -3159,9 +1821,10 @@ import { ConfigAuditModule } from '../config-audit/config-audit.module';
   exports:     [WebhookDeliveryService],
 })
 export class ConfigWebhooksModule {}
-</file>
+```
 
-<file path="src/config-webhooks/config-webhooks.service.ts">
+## File: src/config-webhooks/config-webhooks.service.ts
+```typescript
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WebhookDeliveryService } from './webhook-delivery.service';
@@ -3249,9 +1912,10 @@ export class ConfigWebhooksService {
     return { success: true, data: logs };
   }
 }
-</file>
+```
 
-<file path="src/config-webhooks/dto/create-webhook.dto.ts">
+## File: src/config-webhooks/dto/create-webhook.dto.ts
+```typescript
 import { IsUrl, IsArray, IsString, ArrayNotEmpty, MaxLength, IsOptional } from 'class-validator';
 
 export class CreateWebhookDto {
@@ -3266,9 +1930,10 @@ export class CreateWebhookDto {
   @IsString() @MaxLength(200) @IsOptional()
   description?: string;
 }
-</file>
+```
 
-<file path="src/config-webhooks/webhook-delivery.processor.ts">
+## File: src/config-webhooks/webhook-delivery.processor.ts
+```typescript
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
@@ -3344,9 +2009,10 @@ export class WebhookDeliveryProcessor extends WorkerHost {
     }
   }
 }
-</file>
+```
 
-<file path="src/config-webhooks/webhook-delivery.service.ts">
+## File: src/config-webhooks/webhook-delivery.service.ts
+```typescript
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -3404,9 +2070,10 @@ export class WebhookDeliveryService {
     return 'sha256=' + crypto.createHmac('sha256', secret).update(body).digest('hex');
   }
 }
-</file>
+```
 
-<file path="src/firebase/firebase.module.ts">
+## File: src/firebase/firebase.module.ts
+```typescript
 import { Global, Module, OnModuleInit, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as admin from 'firebase-admin';
@@ -3430,55 +2097,69 @@ export class FirebaseModule implements OnModuleInit {
     this.logger.log(`Firebase Admin inicializado: ${projectId}`);
   }
 }
-</file>
+```
 
-<file path="src/main.ts">
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger } from '@nestjs/common';
-import { AppModule } from './app.module';
-import helmet from 'helmet';
+## File: src/organizations-client/organizations-client.module.ts
+```typescript
+import { Global, Module } from '@nestjs/common';
+import { RedisModule } from '../redis/redis.module';
+import { OrganizationsClientService } from './organizations-client.service';
 
-async function bootstrap() {
-  const logger = new Logger('Bootstrap');
-  const app    = await NestFactory.create(AppModule);
+/**
+ * Global: TenantGuard y ApiKeyGuard lo consumen vía @UseGuards en cada
+ * controller (no son APP_GUARD), por lo que necesitan que el provider
+ * esté disponible en cualquier módulo sin importarlo explícitamente.
+ */
+@Global()
+@Module({
+  imports: [RedisModule],
+  providers: [OrganizationsClientService],
+  exports: [OrganizationsClientService],
+})
+export class OrganizationsClientModule {}
+```
 
-  app.use(helmet());
+## File: src/organizations-client/types/organization-access.types.ts
+```typescript
+/**
+ * Contrato compartido con real-back (src/users/types/organization-access.types.ts).
+ * Si cambia uno, debe actualizarse el otro. Ver nota de ADR en ese archivo.
+ */
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist:            true,
-      forbidNonWhitelisted: true,
-      transform:            true,
-      disableErrorMessages: process.env['NODE_ENV'] === 'production',
-    }),
-  );
+export type TenantRole = 'OWNER' | 'COLLABORATOR';
 
-  app.setGlobalPrefix('api/v1');
-
-  app.enableCors({
-    origin:      process.env['ALLOWED_ORIGINS']?.split(',') ?? ['http://localhost:3000'],
-    methods:     ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    credentials: true,
-  });
-
-  const port = process.env['PORT'] ?? 3001;
-  await app.listen(port);
-  logger.log(`Config Service corriendo en http://localhost:${port}/api/v1`);
+export interface CollaboratorPermissions {
+  canViewListings: boolean;
+  canCreateListings: boolean;
+  canEditListings: boolean;
+  canDeleteListings: boolean;
+  canViewStats: boolean;
+  canManageLeads: boolean;
+  canManageCollaborators: boolean;
 }
 
-bootstrap();
-</file>
+export interface OrganizationAccessResult {
+  canAccess: boolean;
+  userId?: string;
+  organizationId?: string;
+  role?: TenantRole;
+  permissions?: CollaboratorPermissions;
+  reason?: string;
+}
+```
 
-<file path="src/prisma/prisma.module.ts">
+## File: src/prisma/prisma.module.ts
+```typescript
 import { Global, Module } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 
 @Global()
 @Module({ providers: [PrismaService], exports: [PrismaService] })
 export class PrismaModule {}
-</file>
+```
 
-<file path="src/prisma/prisma.service.ts">
+## File: src/prisma/prisma.service.ts
+```typescript
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
@@ -3500,99 +2181,853 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$disconnect();
   }
 }
-</file>
+```
 
-<file path="src/redis/redis.module.ts">
+## File: src/redis/redis.module.ts
+```typescript
 import { Global, Module } from '@nestjs/common';
 import { RedisService } from './redis.service';
 
 @Global()
 @Module({ providers: [RedisService], exports: [RedisService] })
 export class RedisModule {}
-</file>
+```
 
-<file path="src/redis/redis.service.ts">
-import { Injectable, OnModuleDestroy, OnModuleInit, Logger } from '@nestjs/common';
-import Redis from 'ioredis';
+## File: prisma/schema.prisma
+```prisma
+// =============================================================================
+// schema.prisma — Config Service
+// Stack: NestJS 11 · Prisma 7 · PostgreSQL · pnpm
+//
+// Identidad/organizaciones/membresías YA NO viven acá: real-back
+// (organizaciones-back) es la única fuente de verdad. Este servicio solo
+// guarda configuración por `organizationId` (string plano, sin FK local),
+// resuelta vía OrganizationsClientService -> GET /auth/organization-access.
+//
+// Después de actualizar este archivo:
+//   pnpm prisma migrate dev --name decouple_identity_from_real_back
+//   pnpm prisma generate
+// =============================================================================
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// MODELOS DEL CONFIG SERVICE
+// =============================================================================
+
+// ─── ApiKey ───────────────────────────────────────────────────────────────────
+// API Keys propias del Config Service. organizationId referencia el id de
+// Organization en real-back (sin FK local).
+
+model ApiKey {
+  id             String    @id @default(uuid())
+  organizationId String
+  name           String
+  keyHash        String    @unique
+  keyPrefix      String
+  scopes         Json      @default("[]")
+  description    String?
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([organizationId])
+  @@index([keyPrefix])
+  @@map("api_keys")
+}
+
+// ─── ThemeConfig ──────────────────────────────────────────────────────────────
+// Temas visuales por organización.
+// organizationId null → tema del sistema (seeds), copiable por cualquier org.
+// Solo un tema puede estar activo por org a la vez (isActive).
+
+model ThemeConfig {
+  id              String  @id @default(uuid())
+  organizationId  String?
+
+  name            String
+  isActive        Boolean @default(false)
+  isSystemDefault Boolean @default(false)
+
+  primaryColor   String  @default("#000000")
+  secondaryColor String  @default("#ffffff")
+  accentColor    String?
+  fontFamily     String  @default("DM Sans")
+  borderRadius   String  @default("0.75rem")
+  logoUrl        String?
+  faviconUrl     String?
+  darkMode       Boolean @default(false)
+  customCSS      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("theme_configs")
+}
+
+// ─── SecretConfig ─────────────────────────────────────────────────────────────
+// Secretos cifrados con AES-256-GCM. El valor nunca se devuelve en claro.
+
+model SecretConfig {
+  id             String    @id @default(uuid())
+  organizationId String
+
+  key            String
+  valueEncrypted String
+  valueIv        String
+  valueTag       String
+  keyPrefix      String
+
+  description  String?
+  systemTarget String    @default("all")
+  isActive     Boolean   @default(true)
+  rotatedAt    DateTime?
+  expiresAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, key])
+  @@index([organizationId])
+  @@map("secret_configs")
+}
+
+// ─── FeatureFlag ──────────────────────────────────────────────────────────────
+// Feature flags por organización o globales del sistema.
+
+model FeatureFlag {
+  id             String  @id @default(uuid())
+  organizationId String?
+
+  key               String
+  enabled           Boolean @default(false)
+  description       String?
+  systemTarget      String  @default("all")
+  rolloutPercentage Int     @default(100)
+  conditions        Json    @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, key])
+  @@index([organizationId])
+  @@map("feature_flags")
+}
+
+// ─── ContentTemplate ──────────────────────────────────────────────────────────
+// Plantillas de contenido con variables {{nombre}}.
+
+model ContentTemplate {
+  id             String  @id @default(uuid())
+  organizationId String?
+
+  key             String
+  name            String
+  content         String
+  category        String  @default("email")
+  systemTarget    String  @default("all")
+  isSystemDefault Boolean @default(false)
+  variables       Json    @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, key])
+  @@index([organizationId])
+  @@map("content_templates")
+}
+
+// ─── QuotaConfig ──────────────────────────────────────────────────────────────
+// Quotas y límites por organización y recurso. limit = -1 → ilimitado.
+
+model QuotaConfig {
+  id             String    @id @default(uuid())
+  organizationId String
+
+  resource     String
+  limit        Int
+  currentUsage Int       @default(0)
+  alertAt      Int       @default(80)
+  resetAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, resource])
+  @@index([organizationId])
+  @@map("quota_configs")
+}
+
+// ─── WebhookEndpoint ──────────────────────────────────────────────────────────
+// Webhooks outbound configurados por la organización.
+
+model WebhookEndpoint {
+  id             String    @id @default(uuid())
+  organizationId String
+
+  url          String
+  events       Json      @default("[]")
+  secretHash   String
+  secretPrefix String
+  isActive     Boolean   @default(true)
+  description  String?
+
+  lastTriggeredAt DateTime?
+  failureCount    Int       @default(0)
+  retryPolicy     Json      @default("{\"maxAttempts\":3,\"backoffMs\":1000}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  deliveryLogs WebhookDeliveryLog[]
+
+  @@index([organizationId])
+  @@map("webhook_endpoints")
+}
+
+// ─── WebhookDeliveryLog ───────────────────────────────────────────────────────
+
+model WebhookDeliveryLog {
+  id        String @id @default(uuid())
+  webhookId String
+
+  event      String
+  statusCode Int?
+  success    Boolean
+  duration   Int?
+  attempt    Int     @default(1)
+  error      String?
+
+  createdAt DateTime @default(now())
+
+  webhook WebhookEndpoint @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId, createdAt])
+  @@map("webhook_delivery_logs")
+}
+
+// ─── ConfigAuditLog ───────────────────────────────────────────────────────────
+// Audit log específico del módulo de configuración.
+// userId es el id de usuario en real-back (sin FK local).
+
+model ConfigAuditLog {
+  id             String  @id @default(uuid())
+  organizationId String?
+  userId         String?
+
+  configType String
+  configKey  String?
+  action     String
+
+  previousValue String?
+  newValue      String?
+  diff          Json?
+  reason        String?
+  ipAddress     String?
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([configType])
+  @@map("config_audit_logs")
+}
+```
+
+## File: src/common/decorators/roles.decorator.ts
+```typescript
+import { SetMetadata } from '@nestjs/common';
+import type { TenantRole } from '../types/tenant-context';
+
+export const ROLES_KEY = 'roles';
+export const Roles = (...roles: TenantRole[]) => SetMetadata(ROLES_KEY, roles);
+```
+
+## File: src/common/guards/api-key.guard.ts
+```typescript
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from '../../prisma/prisma.service';
+import { FULL_PERMISSIONS, type TenantContext } from '../types/tenant-context';
+
+const KEY_PREFIX = 'sk_live_';
+
+/**
+ * API Keys propias de config-service (scoped a una organizationId de
+ * real-back, sin FK local — esa tabla ya no es source-of-truth de orgs).
+ * Otorgan acceso de nivel OWNER dentro del scope declarado.
+ */
+@Injectable()
+export class ApiKeyGuard implements CanActivate {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async canActivate(ctx: ExecutionContext): Promise<boolean> {
+    const req    = ctx.switchToHttp().getRequest();
+    const rawKey = req.headers['x-api-key'] as string;
+    if (!rawKey) return false;
+
+    if (!rawKey.startsWith(KEY_PREFIX)) throw new UnauthorizedException('Formato de API Key inválido');
+
+    const keyPrefix  = rawKey.substring(0, 12);
+    const candidates = await this.prisma.apiKey.findMany({
+      where: {
+        keyPrefix,
+        revokedAt: null,
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+    });
+
+    for (const candidate of candidates) {
+      const valid = await bcrypt.compare(rawKey, candidate.keyHash);
+      if (valid) {
+        void this.prisma.apiKey
+          .update({ where: { id: candidate.id }, data: { lastUsedAt: new Date() } })
+          .catch(() => null);
+
+        const tenantCtx: TenantContext = {
+          userId:         `api-key:${candidate.id}`,
+          organizationId: candidate.organizationId,
+          role:           'OWNER',
+          permissions:    FULL_PERMISSIONS,
+          apiKeyScopes:   candidate.scopes as string[],
+        };
+        req.tenant = tenantCtx;
+        return true;
+      }
+    }
+    throw new UnauthorizedException('API Key inválida o expirada');
+  }
+}
+```
+
+## File: src/common/guards/roles.guard.ts
+```typescript
+import {
+  CanActivate, ExecutionContext, ForbiddenException, Injectable,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import type { TenantContext, TenantRole } from '../types/tenant-context';
+import { ROLES_KEY } from '../decorators/roles.decorator';
+
+// real-back solo conoce dos roles: OWNER (dueño de la organización) y
+// COLLABORATOR (con permisos granulares vía TenantContext.permissions).
+const HIERARCHY: Record<TenantRole, number> = { OWNER: 2, COLLABORATOR: 1 };
 
 @Injectable()
-export class RedisService extends Redis implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(RedisService.name);
+export class RolesGuard implements CanActivate {
+  constructor(private readonly reflector: Reflector) {}
 
-  constructor() {
-    super(process.env['REDIS_URL'] ?? 'redis://localhost:6379', {
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
-    });
-  }
+  canActivate(ctx: ExecutionContext): boolean {
+    const required = this.reflector.getAllAndOverride<TenantRole[]>(ROLES_KEY, [
+      ctx.getHandler(), ctx.getClass(),
+    ]);
+    if (!required?.length) return true;
 
-  async onModuleInit(): Promise<void> {
-    await this.connect();
-    this.logger.log('Redis conectado');
-  }
+    const { tenant } = ctx.switchToHttp().getRequest() as { tenant?: TenantContext };
+    if (!tenant) throw new ForbiddenException('Tenant context requerido');
 
-  async onModuleDestroy(): Promise<void> {
-    await this.quit();
-  }
-}
-</file>
+    const userLevel = HIERARCHY[tenant.role] ?? 0;
+    const minLevel  = Math.min(...required.map((r) => HIERARCHY[r] ?? 0));
 
-<file path="test/app.e2e-spec.ts">
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
-
-describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
-  });
-});
-</file>
-
-<file path="test/jest-e2e.json">
-{
-  "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
-  "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
-  "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    if (userLevel < minLevel) {
+      throw new ForbiddenException(
+        `Rol requerido: ${required.join(' o ')}. Tu rol: ${tenant.role}`,
+      );
+    }
+    return true;
   }
 }
-</file>
+```
 
-<file path=".npmrc">
-# pnpm v9+ requiere lista explícita de paquetes autorizados a correr scripts
-# La clave es onlyBuiltDependencies (reemplaza approve-builds que fue removido)
-# Todos los paquetes del ERR_PNPM_IGNORED_BUILDS deben estar aquí
+## File: src/common/guards/tenant.guard.ts
+```typescript
+import {
+  CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException,
+} from '@nestjs/common';
+import { OrganizationsClientService } from '../../organizations-client/organizations-client.service';
+import type { TenantContext } from '../types/tenant-context';
 
-onlyBuiltDependencies[]=prisma
-onlyBuiltDependencies[]=@prisma/engines
-onlyBuiltDependencies[]=bcrypt
-onlyBuiltDependencies[]=@nestjs/core
-onlyBuiltDependencies[]=@firebase/util
-onlyBuiltDependencies[]=msgpackr-extract
-onlyBuiltDependencies[]=protobufjs
-onlyBuiltDependencies[]=unrs-resolver
-</file>
+/**
+ * Resuelve el TenantContext consultando a real-back (organizaciones-back)
+ * vía OrganizationsClientService — Opción B del ADR de integración.
+ *
+ * Reemplaza la versión anterior que consultaba tablas locales
+ * `users`/`memberships` (duplicado del template del ecosistema, eliminadas
+ * en la migración 20260612120000_decouple_identity_from_real_back).
+ */
+@Injectable()
+export class TenantGuard implements CanActivate {
+  constructor(private readonly orgsClient: OrganizationsClientService) {}
 
-<file path="package.json">
+  async canActivate(ctx: ExecutionContext): Promise<boolean> {
+    const req            = ctx.switchToHttp().getRequest();
+    const user           = req.user as { uid: string } | undefined;
+    const organizationId = req.headers['x-organization-id'] as string | undefined;
+    const token          = this.extractToken(req);
+
+    if (!organizationId) throw new ForbiddenException('Header x-organization-id requerido');
+    if (!user?.uid) throw new UnauthorizedException('Usuario no autenticado');
+    if (!token) throw new UnauthorizedException('Token de autenticación requerido');
+
+    const access = await this.orgsClient.getAccess(token, user.uid, organizationId);
+
+    if (!access.canAccess || !access.role || !access.permissions || !access.userId) {
+      throw new ForbiddenException(access.reason ?? 'No tenés acceso a esta organización');
+    }
+
+    const tenantCtx: TenantContext = {
+      userId:         access.userId,
+      organizationId,
+      role:           access.role,
+      permissions:    access.permissions,
+    };
+    req.tenant = tenantCtx;
+    return true;
+  }
+
+  private extractToken(req: { headers: Record<string, string | undefined> }): string | undefined {
+    const [type, token] = req.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
+  }
+}
+```
+
+## File: src/common/types/tenant-context.ts
+```typescript
+/**
+ * TenantContext — ya NO se resuelve contra una tabla local de Membership.
+ * Se obtiene de OrganizationsClientService, que consulta a real-back
+ * (única fuente de verdad de usuarios/organizaciones/colaboradores).
+ */
+
+export type TenantRole = 'OWNER' | 'COLLABORATOR';
+
+export interface CollaboratorPermissions {
+  canViewListings: boolean;
+  canCreateListings: boolean;
+  canEditListings: boolean;
+  canDeleteListings: boolean;
+  canViewStats: boolean;
+  canManageLeads: boolean;
+  canManageCollaborators: boolean;
+}
+
+export const FULL_PERMISSIONS: CollaboratorPermissions = {
+  canViewListings: true,
+  canCreateListings: true,
+  canEditListings: true,
+  canDeleteListings: true,
+  canViewStats: true,
+  canManageLeads: true,
+  canManageCollaborators: true,
+};
+
+export interface TenantContext {
+  userId: string;
+  organizationId: string;
+  role: TenantRole;
+  permissions: CollaboratorPermissions;
+  apiKeyScopes?: string[];
+}
+```
+
+## File: src/config-audit/config-audit.controller.ts
+```typescript
+import {
+  Controller, Get, Query, ParseIntPipe, DefaultValuePipe, UseGuards,
+} from '@nestjs/common';
+import { ConfigAuditService } from './config-audit.service';
+import { Tenant } from '../common/decorators/tenant.decorator';
+import type { TenantContext } from '../common/types/tenant-context';
+import { Roles } from '../common/decorators/roles.decorator';
+import { TenantGuard } from '../common/guards/tenant.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+
+@Controller('config/audit')
+@UseGuards(TenantGuard, RolesGuard)
+@Roles('OWNER', 'COLLABORATOR')
+export class ConfigAuditController {
+  constructor(private readonly svc: ConfigAuditService) {}
+
+  @Get()
+  get(
+    @Tenant() tenant: TenantContext,
+    @Query('configType') configType?: string,
+    @Query('from')       from?: string,
+    @Query('to')         to?: string,
+    @Query('userId')     userId?: string,
+    @Query('take', new DefaultValuePipe(50), ParseIntPipe) take?: number,
+    @Query('skip', new DefaultValuePipe(0),  ParseIntPipe) skip?: number,
+  ) {
+    return this.svc.getByOrg(
+      tenant.organizationId,
+      {
+        configType,
+        from: from ? new Date(from) : undefined,
+        to:   to   ? new Date(to)   : undefined,
+        userId,
+      },
+      take,
+      skip,
+    );
+  }
+}
+```
+
+## File: src/config-quotas/config-quotas.controller.ts
+```typescript
+import {
+  Controller, Get, Patch, Post, Param, Body, UseGuards, ParseIntPipe,
+} from '@nestjs/common';
+import { ConfigQuotasService } from './config-quotas.service';
+import { Tenant } from '../common/decorators/tenant.decorator';
+import type { TenantContext } from '../common/types/tenant-context';
+import { Roles } from '../common/decorators/roles.decorator';
+import { TenantGuard } from '../common/guards/tenant.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { ApiKeyGuard } from '../common/guards/api-key.guard';
+import { Public } from '../common/decorators/public.decorator';
+import { IsInt, Min } from 'class-validator';
+
+class UpdateLimitDto { @IsInt() @Min(1) limit: number; }
+class CheckDto       { orgId?: string; }
+
+@Controller('config/quotas')
+export class ConfigQuotasController {
+  constructor(private readonly svc: ConfigQuotasService) {}
+
+  @Get()
+  @UseGuards(TenantGuard, RolesGuard)
+  @Roles('OWNER', 'COLLABORATOR')
+  getForOrg(@Tenant() t: TenantContext) {
+    return this.svc.getForOrg(t.organizationId);
+  }
+
+  @Patch(':resource')
+  @UseGuards(TenantGuard, RolesGuard)
+  @Roles('OWNER')
+  updateLimit(
+    @Tenant() t: TenantContext,
+    @Param('resource') resource: string,
+    @Body() dto: UpdateLimitDto,
+  ) {
+    return this.svc.updateLimit(t.organizationId, t.userId, resource, dto.limit);
+  }
+
+  @Public()
+  @Post(':resource/check')
+  @UseGuards(ApiKeyGuard)
+  check(@Param('resource') resource: string, @Tenant() t: TenantContext) {
+    return this.svc.check(t.organizationId, resource);
+  }
+
+  @Public()
+  @Post(':resource/increment')
+  @UseGuards(ApiKeyGuard)
+  increment(@Param('resource') resource: string, @Tenant() t: TenantContext) {
+    return this.svc.increment(t.organizationId, resource);
+  }
+}
+```
+
+## File: src/config-templates/config-templates.controller.ts
+```typescript
+import {
+  Controller, Get, Post, Patch, Param, Body, UseGuards, HttpCode, HttpStatus,
+} from '@nestjs/common';
+import { ConfigTemplatesService } from './config-templates.service';
+import { CreateTemplateDto } from './dto/create-template.dto';
+import { Tenant } from '../common/decorators/tenant.decorator';
+import type { TenantContext } from '../common/types/tenant-context';
+import { Roles } from '../common/decorators/roles.decorator';
+import { TenantGuard } from '../common/guards/tenant.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { ApiKeyGuard } from '../common/guards/api-key.guard';
+import { Public } from '../common/decorators/public.decorator';
+
+@Controller('config/templates')
+export class ConfigTemplatesController {
+  constructor(private readonly svc: ConfigTemplatesService) {}
+
+  @Get()
+  @UseGuards(TenantGuard, RolesGuard)
+  list(@Tenant() t: TenantContext) {
+    return this.svc.list(t.organizationId);
+  }
+
+  @Public()
+  @Get(':key')
+  @UseGuards(ApiKeyGuard)
+  resolve(@Param('key') key: string, @Tenant() t: TenantContext) {
+    return this.svc.resolve(t.organizationId, key);
+  }
+
+  @Post()
+  @UseGuards(TenantGuard, RolesGuard)
+  @Roles('OWNER', 'COLLABORATOR')
+  @HttpCode(HttpStatus.CREATED)
+  create(@Tenant() t: TenantContext, @Body() dto: CreateTemplateDto) {
+    return this.svc.create(t.organizationId, t.userId, dto);
+  }
+
+  @Patch(':key')
+  @UseGuards(TenantGuard, RolesGuard)
+  @Roles('OWNER', 'COLLABORATOR')
+  update(
+    @Tenant() t: TenantContext,
+    @Param('key') key: string,
+    @Body() dto: CreateTemplateDto,
+  ) {
+    return this.svc.update(t.organizationId, t.userId, key, dto);
+  }
+}
+```
+
+## File: src/config-themes/config-themes.controller.ts
+```typescript
+import {
+  Controller, Get, Post, Patch, Delete,
+  Param, Body, UseGuards, HttpCode, HttpStatus,
+} from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
+import { ConfigThemesService } from './config-themes.service';
+import { CreateThemeDto } from './dto/create-theme.dto';
+import { Tenant } from '../common/decorators/tenant.decorator';
+import type { TenantContext } from '../common/types/tenant-context';
+import { Roles } from '../common/decorators/roles.decorator';
+import { TenantGuard } from '../common/guards/tenant.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Public } from '../common/decorators/public.decorator';
+
+@Controller('config')
+export class ConfigThemesController {
+  constructor(private readonly svc: ConfigThemesService) {}
+
+  @Public()
+  @Get('theme/:orgSlug')
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
+  getPublic(@Param('orgSlug') orgSlug: string) {
+    return this.svc.getPublicTheme(orgSlug);
+  }
+
+  @Get('themes')
+  @UseGuards(TenantGuard, RolesGuard)
+  list(@Tenant() tenant: TenantContext) {
+    return this.svc.list(tenant.organizationId);
+  }
+
+  @Post('themes')
+  @UseGuards(TenantGuard, RolesGuard)
+  @Roles('OWNER', 'COLLABORATOR')
+  @HttpCode(HttpStatus.CREATED)
+  create(@Tenant() tenant: TenantContext, @Body() dto: CreateThemeDto) {
+    return this.svc.create(tenant.organizationId, tenant.userId, dto);
+  }
+
+  @Patch('themes/:id/activate')
+  @UseGuards(TenantGuard, RolesGuard)
+  @Roles('OWNER', 'COLLABORATOR')
+  activate(@Tenant() tenant: TenantContext, @Param('id') id: string) {
+    return this.svc.activate(tenant.organizationId, tenant.userId, id);
+  }
+
+  @Delete('themes/:id')
+  @UseGuards(TenantGuard, RolesGuard)
+  @Roles('OWNER')
+  remove(@Tenant() tenant: TenantContext, @Param('id') id: string) {
+    return this.svc.remove(tenant.organizationId, tenant.userId, id);
+  }
+}
+```
+
+## File: src/main.ts
+```typescript
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import { AppModule } from './app.module';
+import helmet from 'helmet';
+
+async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+  const app    = await NestFactory.create(AppModule);
+
+  app.use(helmet());
+
+  // ── Health-check sin auth (Railway lo usa para detectar si el pod está vivo)
+  // Registramos ANTES del prefijo global para que quede en GET /health
+  const httpAdapter = app.getHttpAdapter();
+  httpAdapter.get('/health', (_req: any, res: any) => {
+    res.status(200).json({ status: 'ok', service: 'real-config-back' });
+  });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist:            true,
+      forbidNonWhitelisted: true,
+      transform:            true,
+      disableErrorMessages: process.env['NODE_ENV'] === 'production',
+    }),
+  );
+
+  app.setGlobalPrefix('api/v1');
+
+  // CORS — acepta lista de orígenes separados por coma desde env
+  const rawOrigins = process.env['ALLOWED_ORIGINS'] ?? '';
+  const origins = rawOrigins
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
+  app.enableCors({
+    // Si no hay origins configurados en env, rechazar todo origen desconocido
+    origin: origins.length > 0 ? origins : false,
+    methods:     ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-organization-id', 'x-api-key'],
+    credentials: true,
+  });
+
+  // Railway inyecta PORT dinámicamente; NUNCA hardcodear 3001 en prod
+  const port = parseInt(process.env['PORT'] ?? '3001', 10);
+  await app.listen(port, '0.0.0.0');
+  logger.log(`Config Service corriendo en http://0.0.0.0:${port}/api/v1`);
+  logger.log(`Health-check disponible en http://0.0.0.0:${port}/health`);
+}
+
+bootstrap();
+```
+
+## File: src/organizations-client/organizations-client.service.ts
+```typescript
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { RedisService } from '../redis/redis.service';
+import type { OrganizationAccessResult } from './types/organization-access.types';
+
+const CACHE_TTL_SECONDS = Number(process.env['CONFIG_CACHE_TTL_ORG_ACCESS'] ?? 30);
+const REQUEST_TIMEOUT_MS = 5000;
+
+// real-back tiene setGlobalPrefix('api/v1') — ver src/main.ts de real-back.
+// Configurable por si alguna vez cambia (o se llama a una instancia sin prefijo).
+const ORGANIZATIONS_SERVICE_PREFIX = process.env['ORGANIZATIONS_SERVICE_PREFIX'] ?? '/api/v1';
+
+/**
+ * Cliente HTTP hacia real-back (organizaciones-back).
+ *
+ * real-back es la única fuente de verdad de usuarios, organizaciones,
+ * colaboradores y permisos. Este servicio resuelve `{ role, permissions }`
+ * para el par (usuario autenticado, organización activa) consultando
+ * GET /auth/organization-access, y cachea el resultado en Redis con TTL
+ * corto para no acoplar la latencia de cada request al servicio remoto.
+ */
+@Injectable()
+export class OrganizationsClientService {
+  private readonly logger = new Logger(OrganizationsClientService.name);
+  private readonly baseUrl: string;
+
+  constructor(private readonly redis: RedisService) {
+    this.baseUrl = (process.env['ORGANIZATIONS_SERVICE_URL'] ?? 'http://localhost:3000').replace(/\/+$/, '');
+  }
+
+  private cacheKey(firebaseUid: string, organizationId: string): string {
+    return `org-access:${firebaseUid}:${organizationId}`;
+  }
+
+  /**
+   * Resuelve el acceso del usuario autenticado a `organizationId`.
+   *
+   * @param firebaseToken Token Bearer del usuario (se reenvía a real-back,
+   *                       que lo vuelve a validar contra Firebase Admin).
+   * @param firebaseUid   UID ya decodificado, usado solo como clave de cache.
+   * @param organizationId Organización activa (header x-organization-id).
+   *
+   * @throws UnauthorizedException si real-back rechaza el token.
+   * @throws ServiceUnavailableException si real-back no responde.
+   */
+  async getAccess(
+    firebaseToken: string,
+    firebaseUid: string,
+    organizationId: string,
+  ): Promise<OrganizationAccessResult> {
+    const key = this.cacheKey(firebaseUid, organizationId);
+
+    const cached = await this.redis.get(key).catch(() => null);
+    if (cached) {
+      return JSON.parse(cached) as OrganizationAccessResult;
+    }
+
+    const result = await this.fetchFromOrganizationsService(firebaseToken, organizationId);
+
+    // Solo cacheamos resultados positivos: un canAccess=false podría volverse
+    // true rápido (ej. acaban de aceptar una invitación) y no queremos que
+    // el usuario quede bloqueado por el TTL.
+    if (result.canAccess) {
+      await this.redis
+        .set(key, JSON.stringify(result), 'EX', CACHE_TTL_SECONDS)
+        .catch((err: Error) => this.logger.warn(`No se pudo cachear org-access: ${err.message}`));
+    }
+
+    return result;
+  }
+
+  private async fetchFromOrganizationsService(
+    firebaseToken: string,
+    organizationId: string,
+  ): Promise<OrganizationAccessResult> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(`${this.baseUrl}${ORGANIZATIONS_SERVICE_PREFIX}/auth/organization-access`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${firebaseToken}`,
+          'x-organization-id': organizationId,
+        },
+        signal: controller.signal,
+      });
+
+      if (res.status === 401) {
+        throw new UnauthorizedException('Token inválido o expirado');
+      }
+      if (res.status === 400) {
+        throw new ForbiddenException('Solicitud inválida al resolver acceso a la organización');
+      }
+      if (!res.ok) {
+        throw new ServiceUnavailableException('Servicio de organizaciones no disponible');
+      }
+
+      const body = (await res.json()) as { data?: OrganizationAccessResult } & OrganizationAccessResult;
+      // organizaciones-back puede envolver la respuesta en { data: ... }; soportamos ambos shapes.
+      return body.data ?? body;
+    } catch (err) {
+      if (err instanceof UnauthorizedException || err instanceof ForbiddenException || err instanceof ServiceUnavailableException) {
+        throw err;
+      }
+      this.logger.error(`Error consultando organizations-service: ${(err as Error).message}`);
+      throw new ServiceUnavailableException('Servicio de organizaciones no disponible');
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+}
+```
+
+## File: package.json
+```json
 {
   "name": "realstate-landing-back",
   "version": "0.0.1",
@@ -3697,30 +3132,184 @@ onlyBuiltDependencies[]=unrs-resolver
     "testEnvironment": "node"
   }
 }
-</file>
+```
 
-<file path="pnpm-workspace.yaml">
-allowBuilds:
-  '@firebase/util': false
-  '@nestjs/core': false
-  '@prisma/engines': false
-  bcrypt: false
-  msgpackr-extract: false
-  prisma: false
-  protobufjs: false
-  unrs-resolver: false
-onlyBuiltDependencies:
-  - prisma
-  - "@prisma/engines"
-  - bcrypt
-  - "@nestjs/core"
-  - "@firebase/util"
-  - msgpackr-extract
-  - protobufjs
-  - unrs-resolver
-</file>
+## File: src/app.module.ts
+```typescript
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BullModule } from '@nestjs/bullmq';
 
-<file path="tsconfig.json">
+import { FirebaseModule }       from './firebase/firebase.module';
+import { PrismaModule }         from './prisma/prisma.module';
+import { RedisModule }          from './redis/redis.module';
+import { ConfigCacheModule }    from './config-cache/config-cache.module';
+import { ConfigAuditModule }    from './config-audit/config-audit.module';
+import { ConfigThemesModule }   from './config-themes/config-themes.module';
+import { ConfigFlagsModule }    from './config-flags/config-flags.module';
+import { ConfigSecretsModule }  from './config-secrets/config-secrets.module';
+import { ConfigTemplatesModule } from './config-templates/config-templates.module';
+import { ConfigQuotasModule }   from './config-quotas/config-quotas.module';
+import { ConfigWebhooksModule } from './config-webhooks/config-webhooks.module';
+import { FirebaseAuthGuard }    from './common/guards/firebase-auth.guard';
+import { OrganizationsClientModule } from './organizations-client/organizations-client.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRoot([
+      { name: 'short', ttl: 1000,  limit: 15  },
+      { name: 'long',  ttl: 60000, limit: 100 },
+    ]),
+    EventEmitterModule.forRoot({ wildcard: false }),
+    BullModule.forRoot({
+      connection: { url: process.env['REDIS_URL'] ?? 'redis://localhost:6379' },
+    }),
+    FirebaseModule,
+    PrismaModule,
+    OrganizationsClientModule,
+    RedisModule,
+    ConfigCacheModule,
+    ConfigAuditModule,
+    ConfigThemesModule,
+    ConfigFlagsModule,
+    ConfigSecretsModule,
+    ConfigTemplatesModule,
+    ConfigQuotasModule,
+    ConfigWebhooksModule,
+  ],
+  providers: [
+    { provide: APP_GUARD, useClass: FirebaseAuthGuard },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
+})
+export class AppModule {}
+```
+
+## File: src/config-flags/config-flags.controller.ts
+```typescript
+import {
+  Controller, Get, Patch, Param, Body,
+  UseGuards, Query, Headers, NotFoundException,
+} from '@nestjs/common';
+import { ConfigFlagsService } from './config-flags.service';
+import { UpdateFlagDto } from './dto/update-flag.dto';
+import { Tenant } from '../common/decorators/tenant.decorator';
+import type { TenantContext } from '../common/types/tenant-context';
+import { Roles } from '../common/decorators/roles.decorator';
+import { TenantGuard } from '../common/guards/tenant.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { ApiKeyGuard } from '../common/guards/api-key.guard';
+import { Public } from '../common/decorators/public.decorator';
+
+@Controller('config/flags')
+export class ConfigFlagsController {
+  constructor(private readonly svc: ConfigFlagsService) {}
+
+  // ── Ruta autenticada: lista flags del tenant actual (vía FirebaseAuthGuard + TenantGuard)
+  @Get()
+  @UseGuards(TenantGuard, RolesGuard)
+  list(@Tenant() tenant: TenantContext) {
+    return this.svc.list(tenant.organizationId);
+  }
+
+  // ── Ruta pública por orgId en path (usada por frontends con API key)
+  @Public()
+  @Get(':orgId')
+  @UseGuards(ApiKeyGuard)
+  getForOrg(
+    @Param('orgId') orgId: string,
+    @Query('role')  role?: string,
+    @Query('plan')  plan?: string,
+  ) {
+    return this.svc.getForOrg(orgId, role, plan);
+  }
+
+  // ── Ruta pública por orgId en header x-organization-id (para llamadas server-side)
+  // Útil cuando el frontend no puede poner orgId en el path
+  @Public()
+  @Get('public/by-org')
+  @UseGuards(ApiKeyGuard)
+  getForOrgByHeader(
+    @Headers('x-organization-id') orgId: string,
+    @Query('role') role?: string,
+    @Query('plan') plan?: string,
+  ) {
+    if (!orgId) throw new NotFoundException('x-organization-id header requerido');
+    return this.svc.getForOrg(orgId, role, plan);
+  }
+
+  // ── Mutaciones (solo OWNER autenticado)
+  @Patch(':id')
+  @UseGuards(TenantGuard, RolesGuard)
+  @Roles('OWNER')
+  update(
+    @Tenant() tenant: TenantContext,
+    @Param('id') id: string,
+    @Body() dto: UpdateFlagDto,
+  ) {
+    return this.svc.update(tenant.organizationId, id, dto);
+  }
+}
+```
+
+## File: src/redis/redis.service.ts
+```typescript
+// src/redis/redis.service.ts
+
+import { Injectable, OnModuleDestroy, OnModuleInit, Logger } from '@nestjs/common';
+import Redis, { type RedisOptions } from 'ioredis';
+
+const REDIS_OPTIONS: RedisOptions = {
+  // Backoff exponencial: 200ms, 400ms... tope 30s, máx 20 reintentos.
+  retryStrategy: (retries: number) => {
+    if (retries > 20) return null;
+    return Math.min(retries * 200, 30_000);
+  },
+
+  // Reconectar en errores de red típicos del free tier.
+  reconnectOnError: (err: Error) => {
+    const shouldReconnect =
+      err.message.includes('ECONNRESET') ||
+      err.message.includes('ETIMEDOUT') ||
+      err.message.includes('ECONNREFUSED');
+    return shouldReconnect ? 2 : false;
+  },
+
+  lazyConnect:          true,
+  maxRetriesPerRequest: 3,
+  connectTimeout:       10_000,
+  enableOfflineQueue:   true,
+  // keepAlive DESACTIVADO — los pings TCP evitan que Railway duerma Redis.
+};
+
+@Injectable()
+export class RedisService extends Redis implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(RedisService.name);
+
+  constructor() {
+    super(process.env['REDIS_URL'] ?? 'redis://localhost:6379', REDIS_OPTIONS);
+
+    this.on('error',       (err: Error) => this.logger.warn(`Redis error: ${err.message}`));
+    this.on('reconnecting',(delay: number) => this.logger.log(`Redis reconectando en ${delay}ms...`));
+    this.on('connect',     () => this.logger.log('Redis conectado'));
+  }
+
+  async onModuleInit(): Promise<void> {
+    await this.connect();
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await this.quit();
+  }
+}
+```
+
+## File: tsconfig.json
+```json
 {
   "compilerOptions": {
     "module": "commonjs",
@@ -3744,69 +3333,4 @@ onlyBuiltDependencies:
     "noFallthroughCasesInSwitch": false
   }
 }
-</file>
-
-<file path="tsconfig.build.json">
-{
-  "extends": "./tsconfig.json",
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
-}
-</file>
-
-<file path="Dockerfile">
-# =============================================================================
-# Dockerfile — Config Service
-# Stack: NestJS 11 · Prisma 7.8.0 · PostgreSQL · Redis · pnpm · Node 22
-# Railway: Release Command → pnpm prisma migrate deploy
-# =============================================================================
-
-# ── Etapa 1: build ────────────────────────────────────────────────────────────
-FROM node:22-alpine AS builder
-
-WORKDIR /app
-
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-COPY package.json pnpm-lock.yaml ./
-COPY prisma ./prisma
-
-RUN pnpm install --frozen-lockfile --ignore-scripts
-
-# Generar cliente Prisma
-RUN pnpm prisma generate
-
-COPY . .
-
-# Compilar con tsc directamente — no depende del binario nest que
-# postinstall registra y que --ignore-scripts bloquea
-RUN node node_modules/typescript/bin/tsc -p tsconfig.build.json && \
-    echo "=== dist contents ===" && \
-    ls -la dist/ || echo "dist/ vacío o no existe"
-
-RUN test -f dist/main.js && echo "✓ dist/main.js ok" || (echo "✗ dist/main.js no existe" && exit 1)
-
-# ── Etapa 2: runtime ──────────────────────────────────────────────────────────
-FROM node:22-alpine AS production
-
-WORKDIR /app
-
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-COPY package.json pnpm-lock.yaml ./
-COPY prisma ./prisma
-
-RUN pnpm install --frozen-lockfile --ignore-scripts
-RUN pnpm prisma generate
-
-COPY --from=builder /app/dist ./dist
-
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
-
-EXPOSE 3001
-
-CMD ["node", "dist/main"]
-</file>
-
-</files>
+```
