@@ -60,4 +60,4 @@ USER nestjs
 EXPOSE 3001
 ENV PORT=3001
 
-CMD ["dumb-init", "sh", "-c", "npx prisma migrate deploy && node dist/main"]
+CMD ["dumb-init", "sh", "-c", "node dist/main"]
